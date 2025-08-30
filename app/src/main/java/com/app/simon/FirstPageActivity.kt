@@ -34,7 +34,7 @@ class FirstPageActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        auth.signOut()
+        //auth.signOut()
         val currentUser = auth.currentUser
         if (currentUser == null) {
             Toast.makeText(baseContext, "user nao logado", Toast.LENGTH_SHORT).show()
@@ -42,6 +42,15 @@ class FirstPageActivity : AppCompatActivity() {
                 delay(1500) // 1.5 segundos
                 val loginDialog = LoginFragment()
                 loginDialog.show(supportFragmentManager, "login_popup")
+            }
+        }else{
+            Toast.makeText(baseContext, "user logado", Toast.LENGTH_SHORT).show()
+            lifecycleScope.launch {
+                delay(1500) // 1.5 segundos
+                // Abre HomeActivity
+                val intent = Intent(this@FirstPageActivity, HomeActivity::class.java)
+                startActivity(intent)
+                finish() // Fecha a FirstPageActivity
             }
         }
     }
