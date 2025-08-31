@@ -44,5 +44,11 @@ class HomeActivity : AppCompatActivity() {
             val intent = Intent(this, CoursesListActivity::class.java)
             startActivity(intent)
         }
+
+        // Clique no cardSubjects -> abrir CoursesListActivity
+        binding.cardMyTutoring.setOnClickListener {
+            val intent = Intent(this, MonitorCoursesListActivity::class.java)
+            startActivity(intent)
+        }
     }
 }
