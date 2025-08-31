@@ -12,15 +12,18 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Simon">
         <activity
+            android:name=".MonitorsListActivity"
+            android:exported="false" />
+        <activity
             android:name=".FirstPageActivity"
-            android:theme="@style/AppTheme"
-            android:exported="true">
+            android:exported="true"
+            android:theme="@style/AppTheme">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="android.intent.category.LAUNCHER"/>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
         <activity
             android:name=".MonitorCoursesListActivity"
             android:exported="false" />
@@ -30,7 +33,6 @@
         <activity
             android:name=".HomeActivity"
             android:exported="false" />
-
     </application>
 
 </manifest>
