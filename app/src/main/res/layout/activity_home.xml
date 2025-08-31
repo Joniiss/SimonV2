@@ -59,7 +59,7 @@
 
         <!-- Linha com 2 cards -->
         <com.google.android.material.card.MaterialCardView
-            android:id="@+id/cardMaterias"
+            android:id="@+id/cardSubjects"
             android:layout_width="350dp"
             android:layout_height="285dp"
             android:layout_marginBottom="0dp"
@@ -100,7 +100,7 @@
 
             <!-- Card Candidatar -->
             <com.google.android.material.card.MaterialCardView
-                android:id="@+id/cardCandidatar"
+                android:id="@+id/cardEnlist"
                 android:layout_width="160dp"
                 android:layout_height="160dp"
                 android:layout_marginEnd="0dp"
@@ -135,7 +135,7 @@
 
             <!-- Card Minhas monitorias -->
             <com.google.android.material.card.MaterialCardView
-                android:id="@+id/cardMinhasMonitorias"
+                android:id="@+id/cardMyTutoring"
                 android:layout_width="160dp"
                 android:layout_height="160dp"
                 android:layout_marginStart="0dp"

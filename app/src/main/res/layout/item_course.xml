@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="60dp"
+    android:orientation="horizontal"
+    android:background="@drawable/bg_course_item"
+    android:padding="8dp"
+    android:layout_marginBottom="12dp"
+    android:gravity="center_vertical">
+
+    <TextView
+        android:id="@+id/tvCourseName"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="Nome da disciplina"
+        android:textColor="@color/white"
+        android:textSize="14sp"
+        android:layout_marginStart="6dp"
+        android:textStyle="bold"/>
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/btnAccess"
+        android:layout_width="110dp"
+        android:layout_height="32dp"
+        android:text="Acessar"
+        android:textSize="10sp"
+        android:textColor="@color/black"
+        android:background="@drawable/bg_btn_access"/>
+
+
+</LinearLayout>
