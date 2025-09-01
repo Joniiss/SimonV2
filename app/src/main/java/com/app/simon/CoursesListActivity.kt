@@ -13,12 +13,22 @@ import androidx.recyclerview.widget.RecyclerView
 import com.app.simon.adapter.CoursesAdapter
 import com.app.simon.data.SubjectData
 import com.app.simon.databinding.ActivityCoursesListBinding
+import com.beust.klaxon.Klaxon
+import com.google.android.gms.tasks.Task
+import com.google.firebase.Firebase
+import com.google.firebase.functions.FirebaseFunctions
+import com.google.firebase.functions.FirebaseFunctionsException
+import com.google.firebase.functions.functions
+import com.google.gson.GsonBuilder
 
 class CoursesListActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityCoursesListBinding
     private lateinit var mRecyclerView: RecyclerView
     private lateinit var mAdapter: CoursesAdapter
+
+    private lateinit var functions: FirebaseFunctions
+    private val gson = GsonBuilder().enableComplexMapKeySerialization().create()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -28,6 +38,8 @@ class CoursesListActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         //setContentView(R.layout.activity_courses_list)
+
+        functions = Firebase.functions("southamerica-east1")
 
         mRecyclerView = binding.rvCourses
 
@@ -45,22 +57,89 @@ class CoursesListActivity : AppCompatActivity() {
             finish() // fecha a CoursesListActivity
         }
 
+        mAdapter = CoursesAdapter(mutableListOf())
+        
+        helloWorld().addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                Toast.makeText(baseContext, task.result, Toast.LENGTH_SHORT).show()
+            }
+            else {
+                Toast.makeText(baseContext, "falhou", Toast.LENGTH_SHORT).show()
+            }
+        }
+        
+        
+        getCourses("Engenharia de Software", 2)
+            .addOnCompleteListener { task ->
+                Toast.makeText(baseContext, "ENTROU AQUI", Toast.LENGTH_SHORT).show()
+                if (task.isSuccessful) {
+                    val genericResp = gson.fromJson(
+                        task.result,
+                        FunctionsGenericResponse::class.java
+                    )
+
+                    val courses = Klaxon()
+                        .parse<MutableList<SubjectData>>(genericResp.payload.toString())
+
+                    mAdapter = CoursesAdapter(courses!!)
+
+                    mRecyclerView.layoutManager = LinearLayoutManager(this)
+                    mRecyclerView.adapter = mAdapter
+                }
+                else {
+                    val e = task.exception
+                    if (e is FirebaseFunctionsException) {
+                        // Function error code, will be INTERNAL if the failure
+                        // was not handled properly in the function call.
+                        val code = e.code
+                        println(code)
+                        // Arbitrary error details passed back from the function,
+                        // usually a Map<String, Any>.
+
+                        val details = e.details
+                        println(details)
+                        Toast.makeText(baseContext, details.toString(), Toast.LENGTH_SHORT).show()
+
+                    }
+                }
+            }
 
 
-        val testList = mutableListOf<SubjectData>(
-            SubjectData("teste1"),
-            SubjectData("teste2"),
-            SubjectData("teste3")
-        )
-        mAdapter = CoursesAdapter(testList)
 
-        mRecyclerView.layoutManager = LinearLayoutManager(this)
-        mRecyclerView.adapter = mAdapter
+        //val testList = mutableListOf<SubjectData>(
+        //    SubjectData("teste1"),
+        //    SubjectData("teste2"),
+        //    SubjectData("teste3")
+        //)
+
 
         if(mAdapter.itemCount == 0){
-            Toast.makeText(baseContext, "Olá tudo bem?", Toast.LENGTH_SHORT).show()
+            Toast.makeText(baseContext, "Você não possui matérias!", Toast.LENGTH_LONG).show()
         }
     }
 
+    private fun getCourses(course: String, term: Int): Task<String> {
 
+        val data = hashMapOf("course" to course,
+            "term" to term)
+        return functions
+            .getHttpsCallable("getCourses")
+            .call(data)
+            .continueWith { task ->
+                gson.toJson(task.result?.data)
+            }
+    }
+
+    private fun helloWorld(): Task<String> {
+
+        val data = hashMapOf("course" to "course",
+            "term" to "term")
+        return functions
+            .getHttpsCallable("helloWorld")
+            .call(data)
+            .continueWith { task ->
+                //gson.toJson(task.result?.data)
+                task.result?.data.toString()
+            }
+    }
 }

@@ -67,4 +67,8 @@ dependencies {
     implementation("de.hdodenhof:circleimageview:3.1.0")
     implementation(platform("com.google.firebase:firebase-bom:34.2.0"))
     implementation("com.google.firebase:firebase-auth")
+    implementation("com.google.firebase:firebase-functions")
+
+    implementation("com.google.code.gson:gson:2.13.1")
+    implementation("com.beust:klaxon:5.6")
 }
