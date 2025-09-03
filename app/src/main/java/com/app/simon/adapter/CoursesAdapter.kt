@@ -32,11 +32,11 @@ class CoursesAdapter(private val mData: MutableList<SubjectData>) : RecyclerView
         private val btnAccess: TextView = itemView.findViewById(R.id.btnAccess)
 
         fun bind(item: SubjectData) {
-            textView.text = item.course
+            textView.text = item.name
 
             btnAccess.setOnClickListener{
                 val iCourse = Intent(itemView.context, MonitorsListActivity::class.java)
-                iCourse.putExtra("course",item.course)
+                iCourse.putExtra("course",item.name)
 
                 itemView.context.startActivity(iCourse)
             }

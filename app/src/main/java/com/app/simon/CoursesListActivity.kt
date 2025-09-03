@@ -78,10 +78,11 @@ class CoursesListActivity : AppCompatActivity() {
                         FunctionsGenericResponse::class.java
                     )
 
-                    val courses = Klaxon()
-                        .parse<MutableList<SubjectData>>(genericResp.payload.toString())
+                    println(genericResp.payload)
 
-                    mAdapter = CoursesAdapter(courses!!)
+                    val courses = Klaxon()
+                        .parseArray<SubjectData>(genericResp.payload.toString())
+                    mAdapter = CoursesAdapter(courses!! as MutableList<SubjectData>)
 
                     mRecyclerView.layoutManager = LinearLayoutManager(this)
                     mRecyclerView.adapter = mAdapter
@@ -95,6 +96,7 @@ class CoursesListActivity : AppCompatActivity() {
                         println(code)
                         // Arbitrary error details passed back from the function,
                         // usually a Map<String, Any>.
+                        Toast.makeText(baseContext, code.toString(), Toast.LENGTH_SHORT).show()
 
                         val details = e.details
                         println(details)
@@ -123,7 +125,7 @@ class CoursesListActivity : AppCompatActivity() {
         val data = hashMapOf("course" to course,
             "term" to term)
         return functions
-            .getHttpsCallable("getCourses")
+            .getHttpsCallable("getCoursesMobile")
             .call(data)
             .continueWith { task ->
                 gson.toJson(task.result?.data)
