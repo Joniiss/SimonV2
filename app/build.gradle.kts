@@ -65,6 +65,10 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
     implementation("de.hdodenhof:circleimageview:3.1.0")
+
+    implementation("com.github.bumptech.glide:glide:5.0.4")
+    annotationProcessor("com.github.bumptech.glide:compiler:5.0.4")
+
     implementation(platform("com.google.firebase:firebase-bom:34.2.0"))
     implementation("com.google.firebase:firebase-auth")
     implementation("com.google.firebase:firebase-functions")

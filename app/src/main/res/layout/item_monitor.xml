@@ -7,7 +7,7 @@
 
     <!-- Foto fora do card -->
     <de.hdodenhof.circleimageview.CircleImageView
-        android:id="@+id/ivProfessor"
+        android:id="@+id/ivMonitor"
         android:layout_width="100dp"
         android:layout_height="100dp"
         android:src="@drawable/placeholder"
@@ -20,12 +20,12 @@
 
     <!-- Card -->
     <com.google.android.material.card.MaterialCardView
-        android:id="@+id/cardProfessor"
+        android:id="@+id/cardMonitor"
         android:layout_width="350dp"
         android:layout_height="wrap_content"
         app:cardCornerRadius="16dp"
         app:cardUseCompatPadding="true"
-        app:layout_constraintTop_toBottomOf="@id/ivProfessor"
+        app:layout_constraintTop_toBottomOf="@id/ivMonitor"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginTop="-60dp"> <!-- empurra metade da foto para dentro -->

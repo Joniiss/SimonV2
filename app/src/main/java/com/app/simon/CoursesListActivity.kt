@@ -67,8 +67,7 @@ class CoursesListActivity : AppCompatActivity() {
                 Toast.makeText(baseContext, "falhou", Toast.LENGTH_SHORT).show()
             }
         }
-        
-        
+
         getCourses("Engenharia de Software", 2)
             .addOnCompleteListener { task ->
                 Toast.makeText(baseContext, "ENTROU AQUI", Toast.LENGTH_SHORT).show()
@@ -105,15 +104,6 @@ class CoursesListActivity : AppCompatActivity() {
                     }
                 }
             }
-
-
-
-        //val testList = mutableListOf<SubjectData>(
-        //    SubjectData("teste1"),
-        //    SubjectData("teste2"),
-        //    SubjectData("teste3")
-        //)
-
 
         if(mAdapter.itemCount == 0){
             Toast.makeText(baseContext, "Você não possui matérias!", Toast.LENGTH_LONG).show()
