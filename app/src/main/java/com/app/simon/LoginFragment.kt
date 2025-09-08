@@ -12,9 +12,12 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.DialogFragment
 import com.app.simon.databinding.FragmentLoginBinding
+import com.google.android.gms.tasks.Task
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
+import com.google.firebase.functions.FirebaseFunctions
+import com.google.firebase.functions.functions
 
 class LoginFragment : DialogFragment() {
 
@@ -22,6 +25,8 @@ class LoginFragment : DialogFragment() {
     private val binding get() = _binding!!
 
     private lateinit var auth: FirebaseAuth
+
+    private lateinit var functions: FirebaseFunctions
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val dialog = Dialog(requireContext())
@@ -86,6 +91,7 @@ class LoginFragment : DialogFragment() {
         }
 
         auth = FirebaseAuth.getInstance()
+        functions = Firebase.functions("southamerica-east1")
 
         binding.btnLogin.setOnClickListener {
             val email = binding.etEmail.text.toString()
@@ -103,6 +109,8 @@ class LoginFragment : DialogFragment() {
                             "Login realizado para usuário ${user?.email}",
                             Toast.LENGTH_LONG
                         ).show()
+                        val iHome = Intent(requireContext(), HomeActivity::class.java)
+                        iHome.putExtra("email", email)
                         startActivity(Intent(requireContext(), HomeActivity::class.java))
                         dialog?.dismiss()
                     } else {
@@ -119,5 +127,17 @@ class LoginFragment : DialogFragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    private fun getUser(subjectId: String): Task<Map<String, Any?>> {
+
+        val data = hashMapOf(
+            "courseId" to subjectId)
+        return functions
+            .getHttpsCallable("findUserMobile")
+            .call(data)
+            .continueWith { task ->
+                task.result?.data as? Map<String, Any?>
+            }
     }
 }

@@ -40,7 +40,7 @@ class MonitorsAdapter(private val mData: MutableList<MonitorData>) : RecyclerVie
         fun bind(item: MonitorData) {
             tvmonitorName.text = item.nome
             tvmonitorPlace.text = "${item.local} - ${item.sala}"
-            tvmonitorTime.text = item.horarioDisponivel[0].day + " " + item.horarioDisponivel[0].time[0]
+            tvmonitorTime.text = item.horarioDisponivel[0].day + " - " + item.horarioDisponivel[0].time[0] + ":00"
 
             Glide.with(itemView)
                 .load(item.foto)

@@ -3,10 +3,12 @@ package com.app.simon
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.app.simon.data.User
 import com.app.simon.databinding.ActivityHomeBinding
 import com.google.android.material.card.MaterialCardView
 
@@ -39,15 +41,20 @@ class HomeActivity : AppCompatActivity() {
             insets
         }
 
+        val user = intent.getSerializableExtra("user") as User
+        Toast.makeText(baseContext, user.nome, Toast.LENGTH_SHORT).show()
+
         // Clique no cardSubjects -> abrir CoursesListActivity
         binding.cardSubjects.setOnClickListener {
             val intent = Intent(this, CoursesListActivity::class.java)
+            intent.putExtra("user", user)
             startActivity(intent)
         }
 
         // Clique no cardSubjects -> abrir CoursesListActivity
         binding.cardMyTutoring.setOnClickListener {
             val intent = Intent(this, MonitorCoursesListActivity::class.java)
+            intent.putExtra("user", user)
             startActivity(intent)
         }
     }

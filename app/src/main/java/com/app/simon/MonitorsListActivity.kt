@@ -53,14 +53,14 @@ class MonitorsListActivity : AppCompatActivity() {
 
         binding.header.setOnClickListener {
             val iVoltar = Intent(this, HomeActivity::class.java)
-            startActivity(iVoltar)
+            //startActivity(iVoltar)
             finish()
         }
 
         mAdapter = MonitorsAdapter(mutableListOf())
 
-
-        getMonitors("ES402")
+        val courseId = intent.getStringExtra("courseId")
+        getMonitors(courseId!!) //ES402
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     val genericResp = gson.fromJson(

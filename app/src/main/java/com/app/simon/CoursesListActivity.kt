@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.app.simon.adapter.CoursesAdapter
 import com.app.simon.data.SubjectData
+import com.app.simon.data.User
 import com.app.simon.databinding.ActivityCoursesListBinding
 import com.beust.klaxon.Klaxon
 import com.google.android.gms.tasks.Task
@@ -43,6 +44,7 @@ class CoursesListActivity : AppCompatActivity() {
 
         mRecyclerView = binding.rvCourses
 
+        val user = intent.getSerializableExtra("user") as User
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
@@ -53,22 +55,13 @@ class CoursesListActivity : AppCompatActivity() {
         // Clique no header
         binding.header.setOnClickListener {
             val iVoltar = Intent(this, HomeActivity::class.java)
-            startActivity(iVoltar)
+            //startActivity(iVoltar)
             finish() // fecha a CoursesListActivity
         }
 
-        mAdapter = CoursesAdapter(mutableListOf())
-        
-        helloWorld().addOnCompleteListener { task ->
-            if (task.isSuccessful) {
-                Toast.makeText(baseContext, task.result, Toast.LENGTH_SHORT).show()
-            }
-            else {
-                Toast.makeText(baseContext, "falhou", Toast.LENGTH_SHORT).show()
-            }
-        }
+        mAdapter = CoursesAdapter(mutableListOf(), user)
 
-        getCourses("Engenharia de Software", 2)
+        getCourses(user.curso, user.periodo)
             .addOnCompleteListener { task ->
                 Toast.makeText(baseContext, "ENTROU AQUI", Toast.LENGTH_SHORT).show()
                 if (task.isSuccessful) {
@@ -81,7 +74,7 @@ class CoursesListActivity : AppCompatActivity() {
 
                     val courses = Klaxon()
                         .parseArray<SubjectData>(genericResp.payload.toString())
-                    mAdapter = CoursesAdapter(courses!! as MutableList<SubjectData>)
+                    mAdapter = CoursesAdapter(courses!! as MutableList<SubjectData>, user)
 
                     mRecyclerView.layoutManager = LinearLayoutManager(this)
                     mRecyclerView.adapter = mAdapter
