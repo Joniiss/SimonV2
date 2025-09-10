@@ -11,13 +11,20 @@ import android.widget.Toast
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.DialogFragment
+import androidx.lifecycle.lifecycleScope
+import com.app.simon.data.User
 import com.app.simon.databinding.FragmentLoginBinding
+import com.beust.klaxon.Klaxon
 import com.google.android.gms.tasks.Task
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
 import com.google.firebase.functions.FirebaseFunctions
+import com.google.firebase.functions.FirebaseFunctionsException
 import com.google.firebase.functions.functions
+import com.google.gson.GsonBuilder
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 class LoginFragment : DialogFragment() {
 
@@ -27,6 +34,8 @@ class LoginFragment : DialogFragment() {
     private lateinit var auth: FirebaseAuth
 
     private lateinit var functions: FirebaseFunctions
+
+    private val gson = GsonBuilder().enableComplexMapKeySerialization().create()
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val dialog = Dialog(requireContext())
@@ -109,10 +118,41 @@ class LoginFragment : DialogFragment() {
                             "Login realizado para usuário ${user?.email}",
                             Toast.LENGTH_LONG
                         ).show()
-                        val iHome = Intent(requireContext(), HomeActivity::class.java)
-                        iHome.putExtra("email", email)
-                        startActivity(Intent(requireContext(), HomeActivity::class.java))
-                        dialog?.dismiss()
+
+                        getUser(user!!.uid)
+                            .addOnCompleteListener { task ->
+                                if (task.isSuccessful) {
+                                    println("sucesso")
+                                    val genericResp = gson.fromJson(
+                                        task.result,
+                                        FunctionsGenericResponse::class.java
+                                    )
+
+                                    val user = Klaxon()
+                                        .parse<User>(genericResp.payload.toString())
+
+                                    println(user!!.curso)
+
+                                    val iHome = Intent(requireContext(), HomeActivity::class.java)
+                                    iHome.putExtra("email", email)
+                                    iHome.putExtra("user", user)
+                                    startActivity(iHome)
+                                    activity?.finish()
+                                    dialog?.dismiss()
+
+                                }
+                                else {
+                                    val e = task.exception
+                                    if (e is FirebaseFunctionsException) {
+                                        val code = e.code
+                                        println(code)
+
+                                        val details = e.details
+                                        println(details)
+                                    }
+                                }
+                            }
+
                     } else {
                         Toast.makeText(
                             requireContext(),
@@ -129,15 +169,15 @@ class LoginFragment : DialogFragment() {
         _binding = null
     }
 
-    private fun getUser(subjectId: String): Task<Map<String, Any?>> {
+    private fun getUser(userUid: String): Task<String> {
 
         val data = hashMapOf(
-            "courseId" to subjectId)
+            "uid" to userUid)
         return functions
             .getHttpsCallable("findUserMobile")
             .call(data)
             .continueWith { task ->
-                task.result?.data as? Map<String, Any?>
+                gson.toJson(task.result?.data)
             }
     }
 }

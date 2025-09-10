@@ -11,6 +11,8 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.app.simon.adapter.CoursesAdapter
+import com.app.simon.adapter.MonitorCoursesAdapter
+import com.app.simon.data.MonitorData
 import com.app.simon.data.SubjectData
 import com.app.simon.data.User
 import com.app.simon.databinding.ActivityCoursesListBinding
@@ -27,7 +29,7 @@ import com.google.gson.GsonBuilder
 class MonitorCoursesListActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMonitorCoursesListBinding
     private lateinit var mRecyclerView: RecyclerView
-    private lateinit var mAdapter: CoursesAdapter
+    private lateinit var mAdapter: MonitorCoursesAdapter
 
     private lateinit var functions: FirebaseFunctions
 
@@ -59,7 +61,7 @@ class MonitorCoursesListActivity : AppCompatActivity() {
             finish() // fecha a CoursesListActivity
         }
 
-        mAdapter = CoursesAdapter(mutableListOf(), user)
+        mAdapter = MonitorCoursesAdapter(mutableListOf(), user)
 
         println(user.uid)
 
@@ -75,8 +77,8 @@ class MonitorCoursesListActivity : AppCompatActivity() {
                     println(genericResp.payload)
 
                     val courses = Klaxon()
-                        .parseArray<SubjectData>(genericResp.payload.toString())
-                    mAdapter = CoursesAdapter(courses!! as MutableList<SubjectData>, user)
+                        .parseArray<MonitorData>(genericResp.payload.toString())
+                    mAdapter = MonitorCoursesAdapter(courses!! as MutableList<MonitorData>, user)
 
                     mRecyclerView.layoutManager = LinearLayoutManager(this)
                     mRecyclerView.adapter = mAdapter

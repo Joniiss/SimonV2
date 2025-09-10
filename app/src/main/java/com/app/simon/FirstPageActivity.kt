@@ -18,6 +18,7 @@ import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
 import com.google.firebase.functions.FirebaseFunctions
+import com.google.firebase.functions.FirebaseFunctionsException
 import com.google.firebase.functions.functions
 import com.google.gson.GsonBuilder
 import kotlinx.coroutines.delay
@@ -47,7 +48,7 @@ class FirstPageActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        //auth.signOut()
+        auth.signOut()
         val currentUser = auth.currentUser
         if (currentUser == null) {
             Toast.makeText(baseContext, "user nao logado", Toast.LENGTH_SHORT).show()
@@ -60,7 +61,9 @@ class FirstPageActivity : AppCompatActivity() {
             Toast.makeText(baseContext, "user logado", Toast.LENGTH_SHORT).show()
             getUser(currentUser.uid)
                 .addOnCompleteListener { task ->
+                    Toast.makeText(baseContext, task.isSuccessful.toString(), Toast.LENGTH_SHORT).show()
                     if (task.isSuccessful) {
+                        println("sucesso")
                         val genericResp = gson.fromJson(
                             task.result,
                             FunctionsGenericResponse::class.java
@@ -78,6 +81,17 @@ class FirstPageActivity : AppCompatActivity() {
                             iHome.putExtra("user", user)
                             startActivity(iHome)
                             finish() // Fecha a FirstPageActivity
+                        }
+                    }
+                    else {
+                        Toast.makeText(baseContext, "ERRO", Toast.LENGTH_SHORT).show()
+                        val e = task.exception
+                        if (e is FirebaseFunctionsException) {
+                            val code = e.code
+                            println(code)
+
+                            val details = e.details
+                            println(details)
                         }
                     }
                 }

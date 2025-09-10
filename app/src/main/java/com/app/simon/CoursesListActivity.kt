@@ -59,7 +59,7 @@ class CoursesListActivity : AppCompatActivity() {
             finish() // fecha a CoursesListActivity
         }
 
-        mAdapter = CoursesAdapter(mutableListOf(), user)
+        mAdapter = CoursesAdapter(mutableListOf(), user, true)
 
         getCourses(user.curso, user.periodo)
             .addOnCompleteListener { task ->
@@ -74,7 +74,7 @@ class CoursesListActivity : AppCompatActivity() {
 
                     val courses = Klaxon()
                         .parseArray<SubjectData>(genericResp.payload.toString())
-                    mAdapter = CoursesAdapter(courses!! as MutableList<SubjectData>, user)
+                    mAdapter = CoursesAdapter(courses!! as MutableList<SubjectData>, user, true)
 
                     mRecyclerView.layoutManager = LinearLayoutManager(this)
                     mRecyclerView.adapter = mAdapter
