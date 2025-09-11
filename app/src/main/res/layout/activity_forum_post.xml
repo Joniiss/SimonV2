@@ -1,10 +1,132 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ForumPostActivity">
+    android:orientation="vertical"
+    android:padding="12dp">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <ImageButton
+        android:id="@+id/btnBack"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:background="@android:color/transparent"
+        android:src="@drawable/caret_left_fill"
+        android:contentDescription="Voltar ao topo"/>
+
+    <!-- Card do post -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/card_post"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="4dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <!-- Barrinha degradê -->
+            <View
+                android:layout_width="6dp"
+                android:layout_height="match_parent"
+                android:background="@drawable/bg_gradient_side"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="8dp" />
+
+            <!-- Conteúdo -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:id="@+id/tvAuthor"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Luan Magri Pinto Tarran"
+                    android:textColor="#3B82F6"
+                    android:textSize="14sp"/>
+
+                <TextView
+                    android:id="@+id/tvTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Teste novo para comentários"
+                    android:textColor="#0A2C78"
+                    android:textStyle="bold"
+                    android:textSize="18sp"
+                    android:layout_marginTop="4dp"/>
+
+                <TextView
+                    android:id="@+id/tvComment"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="O Naruto pode ser um pouco duro às vezes, talvez você não saiba disso, mas o Naruto também cresceu sem pai. Na verdade ele nunca conheceu nenhum de seus pais"
+                    android:textColor="#374151"
+                    android:textSize="14sp"
+                    android:layout_marginTop="6dp"
+                    android:lineSpacingExtra="2dp"/>
+
+                <!-- Likes -->
+                <LinearLayout
+                    android:id="@+id/btnLikes"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginTop="12dp"
+                    android:gravity="center_vertical">
+
+                    <ImageView
+                        android:id="@+id/ivLikes"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:src="@drawable/ic_like"
+                        app:tint="#0A2C78" />
+
+                    <TextView
+                        android:id="@+id/tvLikes"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="32"
+                        android:textColor="#0A2C78"
+                        android:textSize="14sp"
+                        android:layout_marginStart="4dp" />
+                </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+
+    <!-- Conteúdo com comentários e input fixo no bottom -->
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <!-- Lista de comentários -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvComments"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clipToPadding="false"
+            android:paddingBottom="64dp"
+            android:layout_marginTop="10dp"
+            android:scrollbars="vertical" />
+
+        <!-- Barra fixa para novo comentário -->
+        <EditText
+            android:id="@+id/etComment"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:layout_gravity="bottom"
+            android:hint="Escreva um comentário"
+            android:background="@drawable/bg_edittext_border"
+            android:padding="12dp"
+            android:textSize="14sp" />
+    </FrameLayout>
+
+
+</LinearLayout>

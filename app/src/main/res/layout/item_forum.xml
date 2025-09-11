@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/card_post"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="8dp"
+    android:background="@android:color/white"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="6dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <!-- Barrinha do degradê -->
+        <View
+            android:layout_width="6dp"
+            android:layout_height="match_parent"
+            android:background="@drawable/bg_gradient_side"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
+            android:layout_gravity="center_vertical"
+            android:clipToOutline="true"
+            android:radius="8dp"/>
+
+        <!-- Conteúdo principal -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <!-- Nome do autor -->
+            <TextView
+                android:id="@+id/tvAuthor"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Luan Magri Pinto Tarran"
+                android:textColor="#3B82F6"
+                android:textSize="14sp"/>
+
+            <!-- Título do post -->
+            <TextView
+                android:id="@+id/tvTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Teste novo para comentários"
+                android:textColor="#0A2C78"
+                android:textStyle="bold"
+                android:textSize="18sp"
+                android:layout_marginTop="4dp"/>
+
+            <!-- Subtítulo -->
+            <TextView
+                android:id="@+id/tvSubtitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Este post"
+                android:textColor="#7A9CC6"
+                android:textSize="13sp"
+                android:layout_marginTop="2dp"/>
+
+            <!-- Likes e comentários -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="12dp"
+                android:gravity="start">
+
+                <!-- Likes -->
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:src="@drawable/ic_like"
+                        app:tint="#0A2C78" />
+
+                    <TextView
+                        android:id="@+id/tvLikes"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="32"
+                        android:textColor="#0A2C78"
+                        android:textSize="14sp"
+                        android:layout_marginStart="4dp" />
+                </LinearLayout>
+
+                <!-- Espaço -->
+                <Space
+                    android:layout_width="16dp"
+                    android:layout_height="wrap_content" />
+
+                <!-- Comentários -->
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:src="@drawable/ic_chat"
+                        app:tint="#0A2C78" />
+
+                    <TextView
+                        android:id="@+id/tvComments"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="8"
+                        android:textColor="#0A2C78"
+                        android:textSize="14sp"
+                        android:layout_marginStart="4dp" />
+                </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+</androidx.cardview.widget.CardView>

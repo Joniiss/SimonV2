@@ -18,6 +18,17 @@
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginTop="5dp"/>
 
+    <!-- Status bolinha -->
+    <View
+        android:id="@+id/status"
+        android:layout_width="26dp"
+        android:layout_height="26dp"
+        android:background="@drawable/bg_status_circle"
+        app:layout_constraintBottom_toBottomOf="@id/ivMonitor"
+        app:layout_constraintEnd_toEndOf="@id/ivMonitor"
+        android:layout_margin="0dp"
+        android:elevation="6dp"/>
+
     <!-- Card -->
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/cardMonitor"
