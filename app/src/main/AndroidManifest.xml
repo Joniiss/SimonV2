@@ -16,6 +16,12 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Simon">
         <activity
+            android:name=".ForumPostActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ForumActivity"
+            android:exported="false" />
+        <activity
             android:name=".MonitorsListActivity"
             android:exported="false" />
         <activity
