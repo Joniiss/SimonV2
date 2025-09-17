@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_gradient">
+
+    <ImageView
+        android:id="@+id/ivBack"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:elevation="4dp"
+        android:src="@drawable/caret_left_fill"
+        android:textSize="28sp"
+        android:textStyle="bold"
+        android:layout_margin="52dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!-- Card principal -->
+    <LinearLayout
+        android:id="@+id/cardAddPost"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="16dp"
+        android:background="@drawable/bg_card"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_margin="16dp">
+
+        <TextView
+            android:id="@+id/tvNewPost"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Novo post"
+            android:gravity="center"
+            android:padding="12dp"
+            android:textColor="@color/black"
+            android:textSize="26sp"
+            android:layout_marginBottom="12dp"/>
+
+        <!-- Campo Título -->
+        <EditText
+            android:id="@+id/etTitulo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Digite o título do post"
+            android:background="@drawable/bg_input"
+            android:padding="12dp"
+            android:textColor="@color/black"
+            android:textColorHint="#ABABAB"
+            android:textSize="16sp"
+            android:layout_marginBottom="12dp"/>
+
+        <!-- Campo Corpo do Post -->
+        <EditText
+            android:id="@+id/etCorpo"
+            android:layout_width="match_parent"
+            android:layout_height="450dp"
+            android:hint="Digite o conteúdo do post"
+            android:gravity="top"
+            android:background="@drawable/bg_input"
+            android:padding="12dp"
+            android:textColor="@color/black"
+            android:textColorHint="#ABABAB"
+            android:textSize="15sp"
+            android:layout_marginBottom="16dp"/>
+
+    </LinearLayout>
+    <!-- Botão Enviar -->
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/btnEnviar"
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bg_course_item"
+        android:padding="12dp"
+        android:text="Publicar"
+        android:textAllCaps="false"
+        android:textColor="@color/white"
+        app:layout_constraintBottom_toBottomOf="@+id/cardAddPost"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginBottom="30dp"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

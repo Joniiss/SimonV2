@@ -110,6 +110,20 @@
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_margin="20dp"/>
 
+    <TextView
+        android:id="@+id/tvCreatePost"
+        android:layout_width="76dp"
+        android:layout_height="76dp"
+        android:text="+"
+        android:textColor="@color/white"
+        android:textSize="32sp"
+        android:gravity="center"
+        android:background="@drawable/bg_circle_blue"
+        android:layout_margin="20dp"
+        app:layout_constraintBottom_toTopOf="@id/ivChat"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+
 
     <!-- FOOTER -->
     <androidx.constraintlayout.widget.ConstraintLayout
