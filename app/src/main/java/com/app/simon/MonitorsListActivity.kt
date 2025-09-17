@@ -14,6 +14,7 @@ import com.app.simon.adapter.MonitorsAdapter
 import com.app.simon.data.HorariosData
 import com.app.simon.data.MonitorData
 import com.app.simon.data.SubjectData
+import com.app.simon.data.User
 import com.app.simon.databinding.ActivityCoursesListBinding
 import com.app.simon.databinding.ActivityMonitorsListBinding
 import com.beust.klaxon.Klaxon
@@ -43,6 +44,8 @@ class MonitorsListActivity : AppCompatActivity() {
         functions = Firebase.functions("southamerica-east1")
 
         mRecyclerView = binding.rvMonitors
+
+        val user = intent.getSerializableExtra("user") as User
 
         //setContentView(R.layout.activity_monitors_list)
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
@@ -102,6 +105,13 @@ class MonitorsListActivity : AppCompatActivity() {
                     }
                 }
             }
+
+        binding.ivForum.setOnClickListener {
+            val iForum = Intent(this, ForumActivity::class.java)
+            iForum.putExtra("courseId", courseId)
+            iForum.putExtra("user", user)
+            startActivity(iForum)
+        }
 
         if(mAdapter.itemCount == 0){
             Toast.makeText(baseContext, "Você não possui matérias!", Toast.LENGTH_LONG).show()

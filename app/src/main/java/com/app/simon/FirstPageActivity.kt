@@ -48,7 +48,7 @@ class FirstPageActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        auth.signOut()
+        //auth.signOut()
         val currentUser = auth.currentUser
         if (currentUser == null) {
             Toast.makeText(baseContext, "user nao logado", Toast.LENGTH_SHORT).show()
