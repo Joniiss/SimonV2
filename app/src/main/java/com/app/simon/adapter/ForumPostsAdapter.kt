@@ -48,6 +48,7 @@ class ForumPostsAdapter(private val mData: MutableList<ForumPostData>, private v
             postAccess.setOnClickListener{
                 val iCourse = Intent(itemView.context, ForumPostActivity::class.java)
                 iCourse.putExtra("post",item)
+                iCourse.putExtra("user",user)
                 itemView.context.startActivity(iCourse)
             }
         }
