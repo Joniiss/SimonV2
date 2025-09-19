@@ -10,11 +10,12 @@ import androidx.recyclerview.widget.RecyclerView
 import com.app.simon.ForumPostActivity
 import com.app.simon.MonitorsListActivity
 import com.app.simon.R
+import com.app.simon.data.ForumData
 import com.app.simon.data.ForumPostData
 import com.app.simon.data.SubjectData
 import com.app.simon.data.User
 
-class ForumPostsAdapter(private val mData: MutableList<ForumPostData>, private val user: User) : RecyclerView.Adapter<ForumPostsAdapter.ForumPostsViewHolder>() {
+class ForumPostsAdapter(private val mData: MutableList<ForumData>, private val user: User) : RecyclerView.Adapter<ForumPostsAdapter.ForumPostsViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ForumPostsViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.item_forum, parent, false)
@@ -38,12 +39,12 @@ class ForumPostsAdapter(private val mData: MutableList<ForumPostData>, private v
         private val tvComments: TextView = itemView.findViewById(R.id.tvComments)
         private val postAccess: LinearLayout = itemView.findViewById(R.id.llPost)
 
-        fun bind(item: ForumPostData) {
-            tvAuthor.text = item.userName
-            tvTitle.text = item.title
-            tvContent.text = item.content
-            tvLikes.text = item.likes.toString()
-            tvComments.text = item.comments.size.toString()
+        fun bind(item: ForumData) {
+            tvAuthor.text = item.data.userName
+            tvTitle.text = item.data.title
+            tvContent.text = item.data.content
+            tvLikes.text = item.data.likes.toString()
+            tvComments.text = item.data.comments.size.toString()
 
             postAccess.setOnClickListener{
                 val iCourse = Intent(itemView.context, ForumPostActivity::class.java)

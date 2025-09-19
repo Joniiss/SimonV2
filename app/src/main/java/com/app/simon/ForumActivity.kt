@@ -73,7 +73,7 @@ class ForumActivity : AppCompatActivity() {
                         postsData.add(posts[i].data)
                     }
 
-                    mAdapter = ForumPostsAdapter(postsData!! as MutableList<ForumPostData>, user)
+                    mAdapter = ForumPostsAdapter(posts!! as MutableList<ForumData>, user)
 
                     mRecyclerView.layoutManager = LinearLayoutManager(this)
                     mRecyclerView.adapter = mAdapter
