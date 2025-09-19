@@ -79,6 +79,10 @@ class ForumActivity : AppCompatActivity() {
                     mRecyclerView.adapter = mAdapter
                 }
             }
+
+        binding.ivBack.setOnClickListener {
+            finish()
+        }
     }
 
     private fun getForumPosts(courseId: String): Task<String> {

@@ -106,6 +106,10 @@ class ForumPostActivity : AppCompatActivity() {
             createComment(comment)
         }
 
+        binding.btnBack.setOnClickListener {
+            finish()
+        }
+
     }
 
     private fun getComments(postId: String): Task<String> {
