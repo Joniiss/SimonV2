@@ -1,5 +1,6 @@
 package com.app.simon
 
+import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
@@ -79,6 +80,13 @@ class ForumActivity : AppCompatActivity() {
                     mRecyclerView.adapter = mAdapter
                 }
             }
+
+        binding.tvCreatePost.setOnClickListener {
+            val intent = Intent(this, NewForumPostActivity::class.java)
+            intent.putExtra("user", user)
+            intent.putExtra("courseId", courseId)
+            startActivity(intent)
+        }
 
         binding.ivBack.setOnClickListener {
             finish()
