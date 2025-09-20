@@ -112,17 +112,18 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:clipToPadding="false"
-            android:paddingBottom="64dp"
+            android:paddingBottom="72dp"
             android:layout_marginTop="10dp"
             android:scrollbars="vertical" />
 
-        <!-- Input de comentário fixo no bottom -->
         <LinearLayout
+            android:id="@+id/commentBar"
             android:layout_width="match_parent"
             android:layout_height="52dp"
+            android:layout_gravity="bottom"
             android:orientation="horizontal"
-            android:background="@drawable/bg_edittext_border"
-            android:layout_gravity="bottom">
+            android:elevation="10dp"
+            android:background="@drawable/bg_edittext_border">
 
             <EditText
                 android:id="@+id/etComment"
@@ -143,9 +144,7 @@
                 android:rotation="180"
                 app:tint="#0A2C78" />
         </LinearLayout>
-
     </FrameLayout>
-
 
 
 </LinearLayout>

@@ -1,6 +1,8 @@
 package com.app.simon
 
+import android.graphics.Rect
 import android.os.Bundle
+import android.widget.FrameLayout
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -23,6 +25,8 @@ import com.google.firebase.functions.functions
 import com.google.gson.GsonBuilder
 import java.time.Instant
 import java.time.format.DateTimeFormatter
+import kotlin.math.max
+import kotlin.math.roundToInt
 
 class ForumPostActivity : AppCompatActivity() {
 
@@ -48,6 +52,24 @@ class ForumPostActivity : AppCompatActivity() {
             insets
         }
 
+        val commentBar = binding.commentBar
+        commentBar.viewTreeObserver.addOnGlobalLayoutListener {
+            val rect = Rect()
+            binding.root.getWindowVisibleDisplayFrame(rect)
+            val screenHeight = binding.root.height
+            val keypadHeight = screenHeight - rect.bottom
+
+            val params = commentBar.layoutParams as FrameLayout.LayoutParams
+            if (keypadHeight > screenHeight * 0.15) {
+                // Teclado visível → sobe barra, mas nunca menos de 20dp da borda
+                val minMargin = (20 * resources.displayMetrics.density).roundToInt()
+                params.bottomMargin = max(minMargin, keypadHeight)
+            } else {
+                // Teclado oculto → fixa no rodapé
+                params.bottomMargin = 0
+            }
+            commentBar.layoutParams = params
+        }
 
         functions = Firebase.functions("southamerica-east1")
 
