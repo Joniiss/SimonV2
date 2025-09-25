@@ -16,6 +16,15 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Simon">
         <activity
+            android:name=".NewMuralPostActivity"
+            android:exported="false" />
+        <activity
+            android:name=".MuralPostActivity"
+            android:exported="false" />
+        <activity
+            android:name=".MuralActivity"
+            android:exported="false" />
+        <activity
             android:name=".TestePostActivity"
             android:exported="false" />
         <activity
@@ -23,8 +32,8 @@
             android:exported="false" />
         <activity
             android:name=".ForumPostActivity"
-            android:windowSoftInputMode="adjustResize"
-            android:exported="false" />
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".ForumActivity"
             android:exported="false" />
