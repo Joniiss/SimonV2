@@ -13,7 +13,6 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <!-- Cabeçalho com gradiente -->
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -111,7 +110,6 @@
 
         </LinearLayout>
 
-        <!-- Imagens -->
         <TextView
             android:id="@+id/tvImagens"
             android:layout_width="match_parent"
