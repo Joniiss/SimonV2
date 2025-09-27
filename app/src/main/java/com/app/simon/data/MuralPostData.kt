@@ -7,7 +7,7 @@ data class MuralPostData(
     val content: String,
     val disciplinaId: String,
     val userName: String,
-    val createdAt: Map<String, Int>,
+    val createdAt: String,
     val files: Array<String>,
     val images: Array<String>,
     val videos: Array<String>
