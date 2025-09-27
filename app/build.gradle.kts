@@ -75,4 +75,5 @@ dependencies {
 
     implementation("com.google.code.gson:gson:2.13.1")
     implementation("com.beust:klaxon:5.6")
+    implementation("androidx.viewpager2:viewpager2:1.1.0")
 }

@@ -121,16 +121,13 @@
             android:textColor="#2b6ea6"
             android:layout_marginLeft="16dp"/>
 
-        <ImageView
+        <androidx.viewpager2.widget.ViewPager2
             android:id="@+id/ivAnexo"
             android:layout_width="match_parent"
             android:layout_height="180dp"
-            android:scaleType="centerCrop"
-            android:background="#cccccc"
             android:layout_marginHorizontal="16dp"
             android:layout_marginTop="4dp"
-            android:layout_marginBottom="12dp"
-            android:contentDescription="Anexo de imagem"/>
+            android:layout_marginBottom="12dp"/>
 
         <TextView
             android:id="@+id/tvVideos"
@@ -142,14 +139,15 @@
             android:textColor="#2b6ea6"
             android:layout_marginLeft="16dp"/>
 
-        <FrameLayout
+        <LinearLayout
             android:id="@+id/flVideos"
             android:layout_width="match_parent"
-            android:layout_height="180dp"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
             android:layout_marginHorizontal="16dp"
-            android:background="#cccccc"
             android:layout_marginTop="4dp"
-            android:layout_marginBottom="12dp"/>
+            android:layout_marginBottom="12dp"
+            android:padding="8dp"/>
 
         <TextView
             android:id="@+id/tvArquivos"
@@ -161,14 +159,16 @@
             android:textColor="#2b6ea6"
             android:layout_marginLeft="16dp"/>
 
-        <FrameLayout
+        <LinearLayout
             android:id="@+id/flArquivos"
             android:layout_width="match_parent"
-            android:layout_height="180dp"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
             android:layout_marginHorizontal="16dp"
-            android:background="#cccccc"
             android:layout_marginTop="4dp"
-            android:layout_marginBottom="16dp"/>
+            android:layout_marginBottom="16dp"
+            android:padding="8dp"/>
+
     </LinearLayout>
 
 </ScrollView>

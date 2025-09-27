@@ -1,11 +1,17 @@
 package com.app.simon
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
+import android.widget.LinearLayout
+import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import com.app.simon.data.ForumData
+import androidx.viewpager2.widget.ViewPager2
+import com.app.simon.adapter.ImagePagerAdapter
 import com.app.simon.data.MuralPostData
 import com.app.simon.data.User
 import com.app.simon.databinding.ActivityMuralPostBinding
@@ -13,8 +19,7 @@ import com.app.simon.databinding.ActivityMuralPostBinding
 class MuralPostActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMuralPostBinding
-
-
+    private var imageAdapter: ImagePagerAdapter? = null // opcional, pode ser null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,5 +40,49 @@ class MuralPostActivity : AppCompatActivity() {
         binding.tvAutor.text = post.userName
         binding.tvTitulo.text = post.title
         binding.tvDescricao.text = post.content
+
+        val images: List<Uri> = post.images.toList().map { Uri.parse(it) }
+        if (images.isNotEmpty()) {
+            imageAdapter = ImagePagerAdapter(this, images)
+            binding.ivAnexo.adapter = imageAdapter
+        }
+
+        post.videos.toList().forEach { link ->
+            val tv = TextView(this).apply {
+                text = link
+                setTextColor(ContextCompat.getColor(context, android.R.color.holo_blue_dark))
+                setOnClickListener {
+                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(link))
+                    startActivity(intent)
+                }
+                layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+                ).apply {
+                    topMargin = 4
+                    bottomMargin = 4
+                }
+            }
+            binding.flVideos.addView(tv)
+        }
+
+        post.files.toList().forEach { link ->
+            val tv = TextView(this).apply {
+                text = link
+                setTextColor(ContextCompat.getColor(context, android.R.color.holo_blue_dark))
+                setOnClickListener {
+                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(link))
+                    startActivity(intent)
+                }
+                layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+                ).apply {
+                    topMargin = 4
+                    bottomMargin = 4
+                }
+            }
+            binding.flArquivos.addView(tv)
+        }
     }
 }
