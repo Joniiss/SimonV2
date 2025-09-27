@@ -113,6 +113,13 @@ class MonitorsListActivity : AppCompatActivity() {
             startActivity(iForum)
         }
 
+        binding.ivBoard.setOnClickListener {
+            val iMural = Intent(this, MuralActivity::class.java)
+            iMural.putExtra("courseId", courseId)
+            iMural.putExtra("user", user)
+            startActivity(iMural)
+        }
+
         if(mAdapter.itemCount == 0){
             Toast.makeText(baseContext, "Você não possui matérias!", Toast.LENGTH_LONG).show()
         }
