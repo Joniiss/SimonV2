@@ -160,7 +160,7 @@ class NewMuralPostActivity : AppCompatActivity() {
                 finish()
             } catch (e: Exception) {
                 e.printStackTrace()
-                Toast.makeText(this@NewMuralPostActivity, "Erro ao criar post", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this@NewMuralPostActivity, "Erro ao criar post!", Toast.LENGTH_SHORT).show()
                 binding.btnPublicar.isEnabled = true
             }
         }
