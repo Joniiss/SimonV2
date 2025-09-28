@@ -8,7 +8,7 @@ data class MuralPostData(
     val disciplinaId: String,
     val userName: String,
     val createdAt: String,
-    val files: Array<String>,
-    val images: Array<String>,
-    val videos: Array<String>
+    val files: List<String>,
+    val images: List<String>,
+    val videos: List<String>
 ) : Serializable
