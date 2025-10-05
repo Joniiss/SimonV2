@@ -16,6 +16,9 @@ import com.app.simon.data.ForumPostData
 import com.app.simon.data.MuralPostData
 import com.app.simon.data.SubjectData
 import com.app.simon.data.User
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 
 class MuralPostsAdapter(private val mData: MutableList<MuralPostData>, private val user: User) : RecyclerView.Adapter<MuralPostsAdapter.MuralPostsViewHolder>() {
 
@@ -37,12 +40,18 @@ class MuralPostsAdapter(private val mData: MutableList<MuralPostData>, private v
         private val tvAuthor: TextView = itemView.findViewById(R.id.tvAutor)
         private val tvTitle: TextView = itemView.findViewById(R.id.tvTitulo)
         private val tvContent: TextView = itemView.findViewById(R.id.tvDescricao)
+        private val tvDate: TextView = itemView.findViewById(R.id.tvData)
         private val postAccess: LinearLayout = itemView.findViewById(R.id.llPost)
+        private val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
+            .withZone(ZoneId.systemDefault())
 
         fun bind(item: MuralPostData) {
             tvAuthor.text = item.userName
             tvTitle.text = item.title
             tvContent.text = item.content
+            val instant = Instant.parse(item.createdAt)
+            tvDate.text = formatter.format(instant)
+
 
             postAccess.setOnClickListener{
                 val iCourse = Intent(itemView.context, MuralPostActivity::class.java)

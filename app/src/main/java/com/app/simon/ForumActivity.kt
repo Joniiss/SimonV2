@@ -88,6 +88,20 @@ class ForumActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
+        binding.ivMonitors.setOnClickListener {
+            val intent = Intent(this, MonitorsListActivity::class.java)
+            intent.putExtra("user", user)
+            intent.putExtra("courseId", courseId)
+            startActivity(intent)
+        }
+
+        binding.ivBoard.setOnClickListener {
+            val intent = Intent(this, MuralActivity::class.java)
+            intent.putExtra("user", user)
+            intent.putExtra("courseId", courseId)
+            startActivity(intent)
+        }
+
         binding.ivBack.setOnClickListener {
             finish()
         }

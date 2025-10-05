@@ -157,6 +157,10 @@ class NewMuralPostActivity : AppCompatActivity() {
                     .await()
 
                 Toast.makeText(this@NewMuralPostActivity, "Post criado com sucesso!", Toast.LENGTH_SHORT).show()
+                val intent = Intent(this@NewMuralPostActivity, MuralActivity::class.java)
+                intent.putExtra("user", user)
+                intent.putExtra("courseId", courseId)
+                startActivity(intent)
                 finish()
             } catch (e: Exception) {
                 e.printStackTrace()
