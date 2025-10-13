@@ -68,7 +68,8 @@ class MuralPostActivity : AppCompatActivity() {
 
         post.files.toList().forEach { link ->
             val tv = TextView(this).apply {
-                text = link
+                println(link.split("%2Ffiles%")[1].split("?alt")[0].replace("%", " "))
+                text = link.split("%2Ffiles%")[1].split("?alt")[0].replace("%", " ")
                 setTextColor(ContextCompat.getColor(context, android.R.color.holo_blue_dark))
                 setOnClickListener {
                     val intent = Intent(Intent.ACTION_VIEW, Uri.parse(link))

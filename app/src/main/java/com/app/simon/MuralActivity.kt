@@ -84,6 +84,24 @@ class MuralActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
+        binding.ivMonitors.setOnClickListener {
+            val intent = Intent(this, MonitorsListActivity::class.java)
+            intent.putExtra("user", user)
+            intent.putExtra("courseId", courseId)
+            startActivity(intent)
+        }
+
+        binding.ivForum.setOnClickListener {
+            val intent = Intent(this, ForumActivity::class.java)
+            intent.putExtra("user", user)
+            intent.putExtra("courseId", courseId)
+            startActivity(intent)
+        }
+
+        binding.ivBack.setOnClickListener {
+            finish()
+        }
+
     }
 
     private fun getMuralPosts(disciplinaId: String): Task<String> {
