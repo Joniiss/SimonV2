@@ -9,6 +9,7 @@ import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.RecyclerView
 import com.app.simon.MonitorsListActivity
+import com.app.simon.ProfileActivity
 import com.app.simon.R
 import com.app.simon.data.HorariosData
 import com.app.simon.data.MonitorData
@@ -81,11 +82,10 @@ class MonitorsAdapter(private val mData: MutableList<MonitorData>) : RecyclerVie
                 .into(ivmonitorPicture)
 
             btnAccess.setOnClickListener {
-                Toast.makeText(
-                    itemView.context,
-                    "Funcionalidade não implementada",
-                    Toast.LENGTH_SHORT
-                ).show()
+                val iProfile = Intent(itemView.context, ProfileActivity::class.java)
+                iProfile.putExtra("monitor",item)
+                itemView.context.startActivity(iProfile)
+
                 //val iCourse = Intent(itemView.context, MonitorsListActivity::class.java)
                 //iCourse.putExtra("course",item.name)
 
