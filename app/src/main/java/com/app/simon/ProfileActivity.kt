@@ -7,17 +7,27 @@ import android.view.View
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.ImageView
+import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.app.simon.adapter.MonitorCoursesAdapter
 import com.app.simon.adapter.MonitorsAdapter.MonitorsViewHolder.ProximoHorarioSlot
 import com.app.simon.adapter.toDayOfWeek
 import com.app.simon.data.HorariosData
 import com.app.simon.data.MonitorData
 import com.app.simon.data.User
 import com.app.simon.databinding.ActivityProfileBinding
+import com.beust.klaxon.Klaxon
 import com.bumptech.glide.Glide
+import com.google.android.gms.tasks.Task
+import com.google.firebase.Firebase
+import com.google.firebase.functions.FirebaseFunctions
+import com.google.firebase.functions.FirebaseFunctionsException
+import com.google.firebase.functions.functions
+import com.google.gson.GsonBuilder
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.time.temporal.ChronoUnit
@@ -28,12 +38,18 @@ class ProfileActivity : AppCompatActivity() {
     private lateinit var binding: ActivityProfileBinding
     private lateinit var subjectsContainer: LinearLayout
 
+    private lateinit var functions: FirebaseFunctions
+
+    private val gson = GsonBuilder().enableComplexMapKeySerialization().create()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
         binding = ActivityProfileBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        functions = Firebase.functions("southamerica-east1")
 
         //ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
         //    val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
@@ -61,19 +77,58 @@ class ProfileActivity : AppCompatActivity() {
             .load(monitor.foto)
             .into(binding.profileImage)
 
-        // EXEMPLO, JONIS USAR COMO VIER VIA JSON
-        addSubject(
-            "Engenharia e Elicitação de Requisitos",
-            listOf("Terça-feira - 16h até 18h", "Quinta-feira - 20h até 22h")
-        )
+        getMonitorCourses(monitor.uid)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    val genericResp = gson.fromJson(
+                        task.result,
+                        FunctionsGenericResponse::class.java
+                    )
 
-        addSubject(
-            "Algoritmos e Linguagem de Programação",
-            listOf("Segunda-feira - 10h até 12h", "Quarta-feira - 14h até 16h")
-        )
+                    println(genericResp.payload)
+
+                    val courses = Klaxon()
+                        .parseArray<MonitorData>(genericResp.payload.toString())
+
+                    for (course in courses!!) {
+                        addSubject(course.disciplina, course.horarioDisponivel)
+                    }
+                }
+                else {
+                    val e = task.exception
+                    if (e is FirebaseFunctionsException) {
+                        // Function error code, will be INTERNAL if the failure
+                        // was not handled properly in the function call.
+                        val code = e.code
+                        println(code)
+                        // Arbitrary error details passed back from the function,
+                        // usually a Map<String, Any>.
+                        Toast.makeText(baseContext, code.toString(), Toast.LENGTH_SHORT).show()
+
+                        val details = e.details
+                        println(details)
+                        Toast.makeText(baseContext, details.toString(), Toast.LENGTH_SHORT).show()
+
+                    }
+                }
+            }
+        binding.btnClose.setOnClickListener {
+            finish()
+        }
     }
 
-    private fun addSubject(name: String, schedules: List<String>) {
+    private fun getMonitorCourses(uid: String): Task<String> {
+
+        val data = hashMapOf("uid" to uid)
+        return functions
+            .getHttpsCallable("getMonitorCoursesMobile")
+            .call(data)
+            .continueWith { task ->
+                gson.toJson(task.result?.data)
+            }
+    }
+
+    private fun addSubject(name: String, schedule: ArrayList<HorariosData>) {
         val itemView = layoutInflater.inflate(R.layout.item_subject, subjectsContainer, false)
         val tvName = itemView.findViewById<TextView>(R.id.tvSubjectName)
         val ivExpand = itemView.findViewById<ImageView>(R.id.ivExpandIcon)
@@ -82,9 +137,10 @@ class ProfileActivity : AppCompatActivity() {
         tvName.text = name
 
         scheduleContainer.removeAllViews()
-        for (text in schedules) {
+        for (day in schedule) {
+            println(day)
             val tv = TextView(this).apply {
-                this.text = text
+                this.text = "${day.day}: Das ${day.time[0]}:00 às ${day.time[day.time.lastIndex]}:00"
                 this.textSize = 14f
                 this.setTextColor(Color.parseColor("#333333"))
                 this.setPadding(0, 4, 0, 4)

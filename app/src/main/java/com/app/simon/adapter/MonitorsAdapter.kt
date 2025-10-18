@@ -5,6 +5,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.content.res.AppCompatResources.getDrawable
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.RecyclerView
@@ -70,6 +71,8 @@ class MonitorsAdapter(private val mData: MutableList<MonitorData>) : RecyclerVie
         private val tvmonitorPlace: TextView = itemView.findViewById(R.id.tvPlace)
         private val tvmonitorTime: TextView = itemView.findViewById(R.id.tvTime)
         private val btnAccess: TextView = itemView.findViewById(R.id.btnAccessMonitor)
+        private val status: View = itemView.findViewById(R.id.status)
+
 
         fun bind(item: MonitorData) {
             tvmonitorName.text = item.nome
@@ -80,6 +83,12 @@ class MonitorsAdapter(private val mData: MutableList<MonitorData>) : RecyclerVie
             Glide.with(itemView)
                 .load(item.foto)
                 .into(ivmonitorPicture)
+
+            status.background = when (item.status) {
+                true -> getDrawable(itemView.context, R.drawable.status_dot_online)
+                false -> getDrawable(itemView.context, R.drawable.bg_status_circle)
+                else -> getDrawable(itemView.context, R.drawable.bg_status_circle)
+            }
 
             btnAccess.setOnClickListener {
                 val iProfile = Intent(itemView.context, ProfileActivity::class.java)
