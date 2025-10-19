@@ -198,15 +198,13 @@
                     android:layout_height="1dp"
                     android:background="#C6D0F5" />
 
-                <ImageView
-                    android:id="@+id/mapView"
+                <fragment
+                    android:id="@+id/mapFragment"
+                    android:name="com.google.android.gms.maps.SupportMapFragment"
                     android:layout_width="match_parent"
                     android:layout_height="150dp"
-                    android:layout_marginTop="12dp"
-                    android:background="#A7D9F9"
-                    android:scaleType="centerCrop"
-                    android:src="@drawable/placeholder"
-                    android:contentDescription="Mapa" />
+                    android:layout_marginTop="12dp" />
+
 
                 <TextView
                     android:layout_width="wrap_content"

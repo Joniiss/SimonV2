@@ -1,9 +1,19 @@
+import java.util.Properties
+import java.io.FileInputStream
+
 plugins {
     alias(libs.plugins.android.application)
     id("com.google.gms.google-services")
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
 }
+val localProperties = Properties()
+val localPropertiesFile = rootProject.file("local.properties")
+if (localPropertiesFile.exists()) {
+    FileInputStream(localPropertiesFile).use { localProperties.load(it) }
+}
+val mapsApiKey: String = localProperties.getProperty("MAPS_API_KEY") ?: ""
+
 
 android {
     namespace = "com.app.simon"
@@ -15,7 +25,7 @@ android {
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
-
+        resValue("string", "google_maps_key", mapsApiKey)
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -78,4 +88,5 @@ dependencies {
     implementation("com.google.code.gson:gson:2.13.1")
     implementation("com.beust:klaxon:5.6")
     implementation("androidx.viewpager2:viewpager2:1.1.0")
+    implementation("com.google.android.gms:play-services-maps:19.0.0")
 }

@@ -22,6 +22,12 @@ import com.app.simon.data.User
 import com.app.simon.databinding.ActivityProfileBinding
 import com.beust.klaxon.Klaxon
 import com.bumptech.glide.Glide
+import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.OnMapReadyCallback
+import com.google.android.gms.maps.SupportMapFragment
+import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.gms.tasks.Task
 import com.google.firebase.Firebase
 import com.google.firebase.functions.FirebaseFunctions
@@ -33,7 +39,7 @@ import java.time.ZonedDateTime
 import java.time.temporal.ChronoUnit
 import java.time.temporal.TemporalAdjusters
 
-class ProfileActivity : AppCompatActivity() {
+class ProfileActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private lateinit var binding: ActivityProfileBinding
     private lateinit var subjectsContainer: LinearLayout
@@ -41,6 +47,7 @@ class ProfileActivity : AppCompatActivity() {
     private lateinit var functions: FirebaseFunctions
 
     private val gson = GsonBuilder().enableComplexMapKeySerialization().create()
+    private var googleMap: GoogleMap? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -76,6 +83,9 @@ class ProfileActivity : AppCompatActivity() {
         Glide.with(this)
             .load(monitor.foto)
             .into(binding.profileImage)
+
+        val mapFragment = supportFragmentManager.findFragmentById(R.id.mapFragment) as SupportMapFragment
+        mapFragment.getMapAsync(this)
 
         getMonitorCourses(monitor.uid)
             .addOnCompleteListener { task ->
@@ -115,6 +125,18 @@ class ProfileActivity : AppCompatActivity() {
         binding.btnClose.setOnClickListener {
             finish()
         }
+    }
+
+    override fun onMapReady(map: GoogleMap) {
+        googleMap = map
+
+        val localMonitor = LatLng(-22.9797, -43.2333)
+        googleMap?.addMarker(
+            MarkerOptions()
+                .position(localMonitor)
+                .title("Local do Monitor")
+        )
+        googleMap?.moveCamera(CameraUpdateFactory.newLatLngZoom(localMonitor, 16f))
     }
 
     private fun getMonitorCourses(uid: String): Task<String> {
