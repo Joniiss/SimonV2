@@ -49,6 +49,8 @@ class ProfileActivity : AppCompatActivity(), OnMapReadyCallback {
     private val gson = GsonBuilder().enableComplexMapKeySerialization().create()
     private var googleMap: GoogleMap? = null
 
+    private lateinit var location: LatLng
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -67,6 +69,7 @@ class ProfileActivity : AppCompatActivity(), OnMapReadyCallback {
         subjectsContainer = findViewById(R.id.subjectsContainer)
 
         val monitor = intent.getSerializableExtra("monitor") as MonitorData
+        location = LatLng(monitor.geoLoc!!.latitude, monitor.geoLoc.longitude)
 
         binding.tvNome.text = monitor.nome
         binding.tvLocalValue.text = "${monitor.local} - ${monitor.sala}"
@@ -129,14 +132,12 @@ class ProfileActivity : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onMapReady(map: GoogleMap) {
         googleMap = map
-
-        val localMonitor = LatLng(-22.9797, -43.2333)
         googleMap?.addMarker(
             MarkerOptions()
-                .position(localMonitor)
+                .position(location)
                 .title("Local do Monitor")
         )
-        googleMap?.moveCamera(CameraUpdateFactory.newLatLngZoom(localMonitor, 16f))
+        googleMap?.moveCamera(CameraUpdateFactory.newLatLngZoom(location, 16f))
     }
 
     private fun getMonitorCourses(uid: String): Task<String> {
