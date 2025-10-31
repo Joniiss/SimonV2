@@ -66,79 +66,105 @@
                 </FrameLayout>
 
                 <TextView
+                    android:id="@+id/tvNome"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="Nome completo"
                     android:textColor="#5B6FA9"
-                    android:textSize="14sp"
-                    android:layout_marginTop="16dp" />
-
-                <EditText
-                    android:id="@+id/etNome"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="Digite seu nome"
-                    android:textColor="#0C2AA5"
-                    android:textColorHint="#5B6FA9"
-                    android:background="@drawable/bg_input"
-                    android:padding="12dp"
-                    android:textSize="16sp"
-                    android:inputType="textPersonName" />
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Local de atendimento"
-                    android:textColor="#5B6FA9"
-                    android:textSize="14sp"
-                    android:layout_marginTop="12dp" />
-
-                <EditText
-                    android:id="@+id/etLocal"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="Ex: H15 - Sala 204"
-                    android:textColor="#0C2AA5"
-                    android:textColorHint="#5B6FA9"
-                    android:background="@drawable/bg_input"
-                    android:padding="12dp"
-                    android:textSize="16sp"
-                    android:inputType="text" />
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Dias, matérias e horários de atendimento"
-                    android:textColor="#5B6FA9"
-                    android:textSize="14sp"
-                    android:layout_marginTop="12dp" />
-
-                <LinearLayout
-                    android:id="@+id/containerHorarios"
-                    android:orientation="vertical"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp" />
-
-                <LinearLayout
-                    android:id="@+id/btnAddHorario"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
                     android:gravity="center"
                     android:orientation="horizontal"
+                    android:textSize="18sp"
+                    android:layout_marginTop="16dp" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Local de atendimento (Prédio - Sala)"
+                    android:textColor="#5B6FA9"
+                    android:textSize="14sp"
+                    android:layout_marginTop="12dp" />
+
+                <LinearLayout
+                    android:orientation="horizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:weightSum="2">
+
+                    <EditText
+                        android:id="@+id/etPredio"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:hint="Prédio (Ex: H15)"
+                        android:textColor="#0C2AA5"
+                        android:textColorHint="#5B6FA9"
+                        android:background="@drawable/bg_input"
+                        android:padding="12dp"
+                        android:textSize="16sp"
+                        android:inputType="text" />
+
+                    <Space
+                        android:layout_width="8dp"
+                        android:layout_height="match_parent" />
+
+                    <EditText
+                        android:id="@+id/etSala"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:hint="Sala (Ex: 204)"
+                        android:textColor="#0C2AA5"
+                        android:textColorHint="#5B6FA9"
+                        android:background="@drawable/bg_input"
+                        android:padding="12dp"
+                        android:textSize="16sp"
+                        android:inputType="text" />
+
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/btnUpdateLocal"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="24dp"
+                    android:orientation="horizontal"
+                    android:gravity="center"
                     android:background="@drawable/bg_btn_outline"
-                    android:padding="10dp"
-                    android:layout_marginTop="8dp">
+                    android:paddingVertical="12dp">
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Adicionar dia, matéria e horário"
+                        android:text="Atualizar localização do maps"
                         android:textColor="#0C2E92"
                         android:textStyle="bold"
-                        android:textSize="14sp"
-                        android:layout_marginStart="8dp" />
+                        android:textSize="16sp"
+                        android:layout_marginEnd="8dp" />
                 </LinearLayout>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Matérias que atendo monitoria"
+                    android:textColor="#5B6FA9"
+                    android:textSize="14sp"
+                    android:layout_marginTop="24dp"
+                    android:layout_marginBottom="8dp" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="#C6D0F5" />
+
+                <LinearLayout
+                    android:id="@+id/subjectsContainer"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginTop="12dp"
+                    android:layout_marginBottom="16dp" />
 
                 <LinearLayout
                     android:id="@+id/btnSalvar"
