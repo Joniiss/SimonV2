@@ -57,5 +57,11 @@ class HomeActivity : AppCompatActivity() {
             intent.putExtra("user", user)
             startActivity(intent)
         }
+
+        binding.ivUserImg.setOnClickListener {
+            val intent = Intent(this, EditProfileActivity::class.java)
+            intent.putExtra("user", user)
+            startActivity(intent)
+        }
     }
 }

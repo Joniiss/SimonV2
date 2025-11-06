@@ -38,7 +38,7 @@
                 android:textColor="@android:color/white"/>
 
             <ImageView
-                android:id="@+id/tvUserImg"
+                android:id="@+id/ivUserImg"
                 android:layout_width="22dp"
                 android:layout_height="22dp"
                 android:layout_marginStart="6dp"
