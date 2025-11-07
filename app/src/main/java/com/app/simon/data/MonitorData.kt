@@ -15,7 +15,7 @@ data class MonitorData (
     val horarioDisponivel: ArrayList<HorariosData>,
     val disciplina: String,
     val disciplinaId: String,
-    val status: java.lang.Boolean,
+    val status: Boolean,
     val sala: String,
     val local: String,
     val remuneracao: Any,

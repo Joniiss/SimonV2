@@ -15,20 +15,24 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.app.simon.data.HorariosData
 import com.app.simon.data.MonitorData
-import com.app.simon.data.UpdateData
 import com.app.simon.data.User
 import com.app.simon.databinding.ActivityEditProfileBinding
-import com.app.simon.databinding.ActivityProfileBinding
 import com.beust.klaxon.Klaxon
 import com.bumptech.glide.Glide
 import com.google.android.gms.tasks.Task
 import com.google.firebase.Firebase
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.functions.FirebaseFunctions
 import com.google.firebase.functions.FirebaseFunctionsException
 import com.google.firebase.functions.functions
 import com.google.gson.GsonBuilder
-import kotlinx.coroutines.awaitAll
+import android.Manifest
+import android.content.pm.PackageManager
+import android.widget.ToggleButton
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.Priority
 
 class EditProfileActivity : AppCompatActivity() {
 
@@ -41,6 +45,20 @@ class EditProfileActivity : AppCompatActivity() {
 
     private val gson = GsonBuilder().enableComplexMapKeySerialization().create()
 
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
+
+    private val requestPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
+            if (isGranted) {
+                // Permission was granted by the user.
+                Toast.makeText(this, "Permissão concedida. Obtendo localização...", Toast.LENGTH_SHORT).show()
+                getCurrentLocation()
+            } else {
+                // Permission was denied.
+                Toast.makeText(this, "Permissão de localização negada.", Toast.LENGTH_LONG).show()
+            }
+        }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -49,6 +67,8 @@ class EditProfileActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         functions = Firebase.functions("southamerica-east1") // Initialize here
+
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
 
         scheduleContainer = findViewById(R.id.subjectsContainer)
@@ -75,23 +95,24 @@ class EditProfileActivity : AppCompatActivity() {
         }
 
         binding.btnUpdateLocal.setOnClickListener {
-            val teste = mapOf(
-                "horarioDisponivel" to HorariosData("Ter", arrayOf(10, 11, 12)),
-
-            )
-            updateMonitor("MlQdNQEy0bgJn7b6HNjhEg7GaJx2", "217253", teste)
-                .addOnCompleteListener { task ->
-                    if (task.isSuccessful) {
-                        Toast.makeText(this, "Horários salvos com sucesso!", Toast.LENGTH_SHORT).show()
-                    } else {
-                        println(task.exception)
-                        Toast.makeText(this, "Erro ao salvar horários.", Toast.LENGTH_SHORT).show()
-                    }
-                }
+            handleLocationUpdate()
+            Toast.makeText(this, "Clicou", Toast.LENGTH_SHORT).show()
         }
         
         binding.btnSalvar.setOnClickListener {
-            Toast.makeText(this, "Clicou", Toast.LENGTH_SHORT).show()
+            val update = mapOf(
+                "local" to binding.etPredio.text.toString(),
+                "sala" to binding.etSala.text.toString()
+            )
+            updateMonitor(user.uid, update)
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        Toast.makeText(this, "Localização atualizada com sucesso!", Toast.LENGTH_SHORT).show()
+                    } else {
+                        println(task.exception)
+                        Toast.makeText(this, "Erro ao atualizar localização.", Toast.LENGTH_SHORT).show()
+                    }
+                }
         }
         
         binding.btnClose.setOnClickListener {
@@ -126,7 +147,7 @@ class EditProfileActivity : AppCompatActivity() {
                             // --- FIX ENDS HERE ---
 
                             // Now, pass the correctly typed data to addSubject
-                            addSubject(course.disciplina, course.disciplinaId,scheduleAsArrayList)
+                            addSubject(course.disciplina, course.status, course.disciplinaId,scheduleAsArrayList)
                         }
                     }
                 } else {
@@ -149,7 +170,7 @@ class EditProfileActivity : AppCompatActivity() {
                 }
             }
 
-        addSubject("abuble","217253", arrayListOf(HorariosData("Ter", arrayOf(10, 11, 12)), HorariosData("Qua", arrayOf(10, 11, 15))))
+        addSubject("abuble",true,"217253", arrayListOf(HorariosData("Ter", arrayOf(10, 11, 12)), HorariosData("Qua", arrayOf(10, 11, 15))))
     }
 
     private fun addScheduleLineView(container: LinearLayout, scheduleData: HorariosData? = null) {
@@ -206,15 +227,19 @@ class EditProfileActivity : AppCompatActivity() {
 
 
 
-    private fun addSubject(name: String, disciplinaId: String, schedule: ArrayList<HorariosData>) {
+    private fun addSubject(name: String, status: Boolean, disciplinaId: String, schedule: ArrayList<HorariosData>) {
         val itemView = layoutInflater.inflate(R.layout.item_subject_schedule, scheduleContainer, false)
         val tvName = itemView.findViewById<TextView>(R.id.tvSubjectName)
         val ivExpand = itemView.findViewById<ImageView>(R.id.ivExpandIcon)
         val scheduleContainera = itemView.findViewById<LinearLayout>(R.id.editScheduleContainer)
         val btnAddHorario = itemView.findViewById<LinearLayout>(R.id.btnAddHorarioMateria)
         val btnSaveSchedule = itemView.findViewById<LinearLayout>(R.id.btnSaveSchedule)
+        val btnToggleMateria = itemView.findViewById<ToggleButton>(R.id.btnToggleMateria)
 
         tvName.text = name
+        btnToggleMateria.isChecked = status
+
+
 
         // Clear previous views and populate from the initial schedule data
 //        print(name + ": ")
@@ -277,6 +302,7 @@ class EditProfileActivity : AppCompatActivity() {
         // --- End of new code ---
 
         itemView.findViewById<LinearLayout>(R.id.headerLayout).setOnClickListener {
+            println("foi aqui")
             if (scheduleContainera.visibility == View.GONE) {
                 scheduleContainera.visibility = View.VISIBLE
                 ivExpand.setImageResource(R.drawable.ic_expand_less)
@@ -288,6 +314,21 @@ class EditProfileActivity : AppCompatActivity() {
                 btnAddHorario.visibility = View.GONE
                 btnSaveSchedule.visibility = View.GONE
             }
+        }
+
+        btnToggleMateria.setOnClickListener {
+            val user = intent.getSerializableExtra("user") as User
+            println("clicou aqui")
+            updateStatus(user.uid, disciplinaId)
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        Toast.makeText(this, "Status atualizado com sucesso!", Toast.LENGTH_SHORT)
+                            .show()
+                    } else {
+                        println(task.exception)
+                        Toast.makeText(this, "Erro ao atualizar status.", Toast.LENGTH_SHORT).show()
+                    }
+                }
         }
 
         scheduleContainer.addView(itemView)
@@ -307,9 +348,8 @@ class EditProfileActivity : AppCompatActivity() {
             }
     }
 
-    private fun updateMonitor(uid: String, disciplinaId: String, updates: Any): Task<String> {
+    private fun updateMonitor(uid: String, updates: Any): Task<String> {
         val data = hashMapOf("uid" to uid,
-            "disciplinaId" to disciplinaId,
             "updates" to updates)
         return functions
             .getHttpsCallable("updateMonitorMobile")
@@ -336,6 +376,82 @@ class EditProfileActivity : AppCompatActivity() {
                     throw task.exception!!
                 }
                 gson.toJson(task.result?.data)
+            }
+    }
+
+    private fun updateStatus(uid: String, disciplinaId: String): Task<String> {
+        val data = hashMapOf("uid" to uid,
+            "disciplinaId" to disciplinaId)
+        return functions
+            .getHttpsCallable("updateStatusMobile")
+            .call(data)
+            .continueWith { task ->
+                // Throws an exception if the task failed, which will be handled by the caller
+                if (!task.isSuccessful) {
+                    throw task.exception!!
+                }
+                gson.toJson(task.result?.data)
+            }
+    }
+
+    private fun handleLocationUpdate() {
+        when {
+            ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED -> {
+                // You can use the API that requires the permission.
+                getCurrentLocation()
+            }
+            shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION) -> {
+                // In an educational UI, explain to the user why your app requires this
+                // permission for a specific feature.
+                Toast.makeText(this, "A permissão de localização é necessária para atualizar seu local.", Toast.LENGTH_LONG).show()
+                requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+            }
+            else -> {
+                // Directly ask for the permission.
+                requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+            }
+        }
+    }
+
+    private fun getCurrentLocation() {
+        // Double-check permission before making the call (required by the linter)
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            return
+        }
+
+        fusedLocationClient.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, null)
+            .addOnSuccessListener { location ->
+                if (location != null) {
+                    val latitude = location.latitude
+                    val longitude = location.longitude
+
+                    Toast.makeText(this, "Localização: Lat $latitude, Lon $longitude", Toast.LENGTH_LONG).show()
+
+                    val user = intent.getSerializableExtra("user") as User
+                    val locationUpdate = mapOf(
+                        "geoLoc" to mapOf(
+                            "latitude" to latitude,
+                            "longitude" to longitude
+                        )
+                    )
+                    updateMonitor(user.uid, locationUpdate)
+                        .addOnCompleteListener { task ->
+                            if (task.isSuccessful) {
+                                Toast.makeText(this, "Localização atualizada no servidor!", Toast.LENGTH_SHORT).show()
+                            } else {
+                                Toast.makeText(this, "Erro ao atualizar localização no servidor.", Toast.LENGTH_SHORT).show()
+                            }
+                        }
+
+                } else {
+                    Toast.makeText(this, "Não foi possível obter a localização.", Toast.LENGTH_LONG).show()
+                }
+            }
+            .addOnFailureListener { e ->
+                Toast.makeText(this, "Falha ao obter localização: ${e.message}", Toast.LENGTH_LONG).show()
             }
     }
 

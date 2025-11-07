@@ -89,4 +89,5 @@ dependencies {
     implementation("com.beust:klaxon:5.6")
     implementation("androidx.viewpager2:viewpager2:1.1.0")
     implementation("com.google.android.gms:play-services-maps:19.0.0")
+    implementation("com.google.android.gms:play-services-location:21.3.0")
 }
