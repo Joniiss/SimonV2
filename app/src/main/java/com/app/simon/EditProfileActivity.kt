@@ -15,6 +15,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.app.simon.data.HorariosData
 import com.app.simon.data.MonitorData
+import com.app.simon.data.UpdateData
 import com.app.simon.data.User
 import com.app.simon.databinding.ActivityEditProfileBinding
 import com.app.simon.databinding.ActivityProfileBinding
@@ -74,7 +75,19 @@ class EditProfileActivity : AppCompatActivity() {
         }
 
         binding.btnUpdateLocal.setOnClickListener {
-            Toast.makeText(this, "Clicou", Toast.LENGTH_SHORT).show()
+            val teste = mapOf(
+                "horarioDisponivel" to HorariosData("Ter", arrayOf(10, 11, 12)),
+
+            )
+            updateMonitor("MlQdNQEy0bgJn7b6HNjhEg7GaJx2", "217253", teste)
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        Toast.makeText(this, "Horários salvos com sucesso!", Toast.LENGTH_SHORT).show()
+                    } else {
+                        println(task.exception)
+                        Toast.makeText(this, "Erro ao salvar horários.", Toast.LENGTH_SHORT).show()
+                    }
+                }
         }
         
         binding.btnSalvar.setOnClickListener {
@@ -113,7 +126,7 @@ class EditProfileActivity : AppCompatActivity() {
                             // --- FIX ENDS HERE ---
 
                             // Now, pass the correctly typed data to addSubject
-                            addSubject(course.disciplina, scheduleAsArrayList)
+                            addSubject(course.disciplina, course.disciplinaId,scheduleAsArrayList)
                         }
                     }
                 } else {
@@ -136,11 +149,7 @@ class EditProfileActivity : AppCompatActivity() {
                 }
             }
 
-
-        val horarios = arrayListOf(HorariosData("Ter", arrayOf(10, 11, 12)), HorariosData("Qua", arrayOf(10, 11, 15))) as ArrayList<HorariosData>
-        addSubject("abuble", arrayListOf(HorariosData("Ter", arrayOf(10, 11, 12)), HorariosData("Qua", arrayOf(10, 11, 15))))
-        addSubject("abubla", horarios)
-
+        addSubject("abuble","217253", arrayListOf(HorariosData("Ter", arrayOf(10, 11, 12)), HorariosData("Qua", arrayOf(10, 11, 15))))
     }
 
     private fun addScheduleLineView(container: LinearLayout, scheduleData: HorariosData? = null) {
@@ -197,7 +206,7 @@ class EditProfileActivity : AppCompatActivity() {
 
 
 
-    private fun addSubject(name: String, schedule: ArrayList<HorariosData>) {
+    private fun addSubject(name: String, disciplinaId: String, schedule: ArrayList<HorariosData>) {
         val itemView = layoutInflater.inflate(R.layout.item_subject_schedule, scheduleContainer, false)
         val tvName = itemView.findViewById<TextView>(R.id.tvSubjectName)
         val ivExpand = itemView.findViewById<ImageView>(R.id.ivExpandIcon)
@@ -248,11 +257,22 @@ class EditProfileActivity : AppCompatActivity() {
                     newScheduleList.add(HorariosData(day, timeArray))
                 }
             }
-
-            // Now you have the updated list. You can show it in a Toast for testing.
-            Toast.makeText(this, "Horários salvos para '$name': ${newScheduleList.size} item(s)", Toast.LENGTH_LONG).show()
-            // In a real scenario, you would pass this list to a function to save to Firebase/backend.
             println("Updated schedule for $name: $newScheduleList")
+
+            val newScheduleJsonString = gson.toJson(newScheduleList)
+            val schedule = mapOf(
+                "horarioDisponivel" to newScheduleJsonString
+            )
+            val user = intent.getSerializableExtra("user") as User
+            updateMonitorSchedule(user.uid, disciplinaId, schedule)
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        Toast.makeText(this, "Horários salvos com sucesso!", Toast.LENGTH_SHORT).show()
+                    } else {
+                        println(task.exception)
+                        Toast.makeText(this, "Erro ao salvar horários.", Toast.LENGTH_SHORT).show()
+                    }
+                }
         }
         // --- End of new code ---
 
@@ -287,6 +307,36 @@ class EditProfileActivity : AppCompatActivity() {
             }
     }
 
+    private fun updateMonitor(uid: String, disciplinaId: String, updates: Any): Task<String> {
+        val data = hashMapOf("uid" to uid,
+            "disciplinaId" to disciplinaId,
+            "updates" to updates)
+        return functions
+            .getHttpsCallable("updateMonitorMobile")
+            .call(data)
+            .continueWith { task ->
+                // Throws an exception if the task failed, which will be handled by the caller
+                if (!task.isSuccessful) {
+                    throw task.exception!!
+                }
+                gson.toJson(task.result?.data)
+            }
+    }
 
+    private fun updateMonitorSchedule(uid: String, disciplinaId: String, schedule: Any): Task<String> {
+        val data = hashMapOf("uid" to uid,
+            "disciplinaId" to disciplinaId,
+            "schedule" to schedule)
+        return functions
+            .getHttpsCallable("updateMonitorScheduleMobile")
+            .call(data)
+            .continueWith { task ->
+                // Throws an exception if the task failed, which will be handled by the caller
+                if (!task.isSuccessful) {
+                    throw task.exception!!
+                }
+                gson.toJson(task.result?.data)
+            }
+    }
 
 }
