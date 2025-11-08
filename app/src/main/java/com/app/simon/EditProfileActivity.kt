@@ -33,6 +33,14 @@ import androidx.core.content.ContextCompat
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
+import android.net.Uri
+import androidx.core.content.FileProvider
+import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.storage
+import java.io.File
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class EditProfileActivity : AppCompatActivity() {
 
@@ -58,6 +66,29 @@ class EditProfileActivity : AppCompatActivity() {
                 Toast.makeText(this, "Permissão de localização negada.", Toast.LENGTH_LONG).show()
             }
         }
+
+    private var latestTmpUri: Uri? = null
+
+    private val takeImageResult = registerForActivityResult(ActivityResultContracts.TakePicture()) { isSuccess ->
+        if (isSuccess) {
+            latestTmpUri?.let { uri ->
+                binding.profileImage.setImageURI(uri) // Preview the new image
+                uploadImageToFirebaseStorage(uri)
+            }
+        }
+    }
+
+    private val requestCameraPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
+            if (isGranted) {
+                // Permission granted, launch the camera now
+                takeImage()
+            } else {
+                Toast.makeText(this, "Permissão da câmera negada.", Toast.LENGTH_LONG).show()
+            }
+        }
+
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -90,10 +121,6 @@ class EditProfileActivity : AppCompatActivity() {
         binding.etPredio.hint = user.predio
         binding.etSala.hint = user.sala
 
-        binding.btnChangeImage.setOnClickListener {
-            Toast.makeText(this, "Clicou", Toast.LENGTH_SHORT).show()
-        }
-
         binding.btnUpdateLocal.setOnClickListener {
             handleLocationUpdate()
             Toast.makeText(this, "Clicou", Toast.LENGTH_SHORT).show()
@@ -117,6 +144,27 @@ class EditProfileActivity : AppCompatActivity() {
         
         binding.btnClose.setOnClickListener {
             finish()
+        }
+
+        binding.btnChangeImage.setOnClickListener {
+            // Check for camera permission first
+            when {
+                ContextCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.CAMERA
+                ) == PackageManager.PERMISSION_GRANTED -> {
+                    // Permission is already granted, launch camera
+                    takeImage()
+                }
+                shouldShowRequestPermissionRationale(Manifest.permission.CAMERA) -> {
+                    Toast.makeText(this, "A permissão de câmera é necessária para alterar a foto.", Toast.LENGTH_LONG).show()
+                    requestCameraPermissionLauncher.launch(Manifest.permission.CAMERA)
+                }
+                else -> {
+                    // Directly ask for the permission
+                    requestCameraPermissionLauncher.launch(Manifest.permission.CAMERA)
+                }
+            }
         }
 
         getMonitorCourses(user.uid)
@@ -171,6 +219,55 @@ class EditProfileActivity : AppCompatActivity() {
             }
 
         addSubject("abuble",true,"217253", arrayListOf(HorariosData("Ter", arrayOf(10, 11, 12)), HorariosData("Qua", arrayOf(10, 11, 15))))
+    }
+
+    private fun takeImage() {
+        getTmpFileUri().let { uri ->
+            latestTmpUri = uri
+            takeImageResult.launch(uri)
+        }
+    }
+
+    private fun getTmpFileUri(): Uri {
+        val timeStamp: String = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
+        val tmpFile = File.createTempFile("JPEG_${timeStamp}_", ".jpg", getExternalFilesDir("Pictures")).apply {
+            createNewFile()
+        }
+
+        return FileProvider.getUriForFile(applicationContext, "${applicationContext.packageName}.fileprovider", tmpFile)
+    }
+
+    private fun uploadImageToFirebaseStorage(fileUri: Uri) {
+        val user = intent.getSerializableExtra("user") as User
+        // Define the path in Firebase Storage: 'profile_images/USER_UID.jpg'
+        val storageRef = Firebase.storage.reference
+        val profileImageRef = storageRef.child("avatars/${user.uid}.jpg")
+
+        // Start the upload
+        Toast.makeText(this, "Iniciando upload da imagem...", Toast.LENGTH_SHORT).show()
+        profileImageRef.putFile(fileUri)
+            .addOnSuccessListener {
+                // Upload successful, now get the download URL
+                profileImageRef.downloadUrl.addOnSuccessListener { downloadUri ->
+                    val imageUrl = downloadUri.toString()
+                    Toast.makeText(this, "Imagem enviada! Atualizando perfil...", Toast.LENGTH_SHORT).show()
+
+                    // Now, update the user's profile with the new image URL
+                    val update = mapOf("foto" to imageUrl)
+                    updateMonitor(user.uid, update) // Pass null for disciplina if updating the root user doc
+                        .addOnCompleteListener { task ->
+                            if (task.isSuccessful) {
+                                Toast.makeText(this, "Foto de perfil atualizada!", Toast.LENGTH_LONG).show()
+                            } else {
+                                Toast.makeText(this, "Erro ao salvar a nova URL da foto.", Toast.LENGTH_LONG).show()
+                            }
+                        }
+                }
+            }
+            .addOnFailureListener { exception ->
+                // Handle unsuccessful uploads
+                Toast.makeText(this, "Falha no upload: ${exception.message}", Toast.LENGTH_LONG).show()
+            }
     }
 
     private fun addScheduleLineView(container: LinearLayout, scheduleData: HorariosData? = null) {
