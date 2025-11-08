@@ -25,19 +25,36 @@
             android:textStyle="bold"
             android:textSize="15sp" />
 
-        <ToggleButton
-            android:id="@+id/btnToggleMateria"
+        <!-- Novo layout para horas + toggle -->
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Offline"
-            android:textAllCaps="false"
-            android:paddingHorizontal="12dp"
-            android:paddingVertical="4dp"
-            android:background="@drawable/bg_btn_toggle_off"
-            android:textColor="#FFFFFF"
-            android:textStyle="bold"
-            android:textSize="12sp"
-            android:layout_marginEnd="8dp" />
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginEnd="8dp">
+
+            <TextView
+                android:id="@+id/tvHours"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0h"
+                android:textColor="#0C2AA5"
+                android:textStyle="bold"
+                android:textSize="14sp"
+                android:layout_marginEnd="6dp" />
+
+            <com.google.android.material.materialswitch.MaterialSwitch
+                android:id="@+id/btnToggleMateria"
+                android:layout_width="55dp"
+                android:layout_height="30dp"
+                android:checked="false"
+                app:trackTint="@color/switch_track_tint"
+                app:thumbTint="@color/switch_thumb_tint"
+                android:layout_gravity="center_vertical" />
+
+
+
+        </LinearLayout>
 
         <ImageView
             android:id="@+id/ivExpandIcon"
@@ -89,7 +106,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Atualizar localização do maps"
+            android:text="Salvar horários"
             android:textColor="#0C2E92"
             android:textStyle="bold"
             android:textSize="16sp"

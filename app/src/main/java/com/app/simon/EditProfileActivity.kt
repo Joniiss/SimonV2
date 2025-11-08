@@ -34,7 +34,9 @@ import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
 import android.net.Uri
+import androidx.appcompat.widget.SwitchCompat
 import androidx.core.content.FileProvider
+import com.google.android.material.materialswitch.MaterialSwitch
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.storage
 import java.io.File
@@ -331,7 +333,7 @@ class EditProfileActivity : AppCompatActivity() {
         val scheduleContainera = itemView.findViewById<LinearLayout>(R.id.editScheduleContainer)
         val btnAddHorario = itemView.findViewById<LinearLayout>(R.id.btnAddHorarioMateria)
         val btnSaveSchedule = itemView.findViewById<LinearLayout>(R.id.btnSaveSchedule)
-        val btnToggleMateria = itemView.findViewById<ToggleButton>(R.id.btnToggleMateria)
+        val btnToggleMateria = itemView.findViewById<MaterialSwitch>(R.id.btnToggleMateria)
 
         tvName.text = name
         btnToggleMateria.isChecked = status
