@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white"
+    tools:context=".ChatActivity">
+
+    <!-- HEADER (padrão dos seus screens) -->
+    <LinearLayout
+        android:id="@+id/header"
+        android:layout_width="match_parent"
+        android:layout_height="72dp"
+        android:background="@drawable/bg_card"
+        android:elevation="4dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageButton
+            android:id="@+id/btnBack"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="@android:color/transparent"
+            android:src="@drawable/caret_left_fill"
+            android:contentDescription="@string/abc_action_bar_up_description"/>
+
+        <TextView
+            android:id="@+id/tvTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:text="Chat"
+            android:textColor="#0C2E92"
+            android:textSize="22sp"
+            android:textStyle="bold"/>
+    </LinearLayout>
+
+    <!-- LISTA DE MENSAGENS -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerChat"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:clipToPadding="false"
+        android:paddingTop="8dp"
+        android:paddingBottom="80dp"
+        app:layout_constraintTop_toBottomOf="@id/header"
+        app:layout_constraintBottom_toTopOf="@id/messageBar"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        tools:listitem="@layout/item_chat_message" />
+
+    <!-- BARRA DE MENSAGEM (inspirada na barra de comentários) -->
+    <LinearLayout
+        android:id="@+id/messageBar"
+        android:layout_width="0dp"
+        android:layout_height="56dp"
+        android:layout_margin="12dp"
+        android:background="@drawable/bg_edittext_border"
+        android:elevation="10dp"
+        android:orientation="horizontal"
+        android:paddingStart="10dp"
+        android:paddingEnd="6dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <EditText
+            android:id="@+id/edtMessage"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@android:color/transparent"
+            android:hint="Escreva uma mensagem"
+            android:imeOptions="actionSend"
+            android:maxLines="4"
+            android:inputType="textMultiLine"
+            android:padding="10dp"
+            android:textSize="14sp"/>
+
+        <ImageButton
+            android:id="@+id/btnSend"
+            android:layout_width="48dp"
+            android:layout_height="match_parent"
+            android:background="@android:color/transparent"
+            android:src="@drawable/caret_left_fill"
+            android:rotation="180"
+            app:tint="#0A2C78"
+            android:contentDescription="@string/send"/>
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
