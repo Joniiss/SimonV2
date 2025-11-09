@@ -195,9 +195,9 @@ class EditProfileActivity : AppCompatActivity() {
                                     HorariosData(scheduleItem.day, timeAsIntArray)
                                 })
                             // --- FIX ENDS HERE ---
-
+                            println(course.quantHoras)
                             // Now, pass the correctly typed data to addSubject
-                            addSubject(course.disciplina, course.status, course.disciplinaId,scheduleAsArrayList)
+                            addSubject(course.disciplina, course.status, course.disciplinaId,scheduleAsArrayList, course.quantHoras)
                         }
                     }
                 } else {
@@ -219,8 +219,6 @@ class EditProfileActivity : AppCompatActivity() {
                     }
                 }
             }
-
-        addSubject("abuble",true,"217253", arrayListOf(HorariosData("Ter", arrayOf(10, 11, 12)), HorariosData("Qua", arrayOf(10, 11, 15))))
     }
 
     private fun takeImage() {
@@ -326,7 +324,7 @@ class EditProfileActivity : AppCompatActivity() {
 
 
 
-    private fun addSubject(name: String, status: Boolean, disciplinaId: String, schedule: ArrayList<HorariosData>) {
+    private fun addSubject(name: String, status: Boolean, disciplinaId: String, schedule: ArrayList<HorariosData>, quantHoras: Number? = 0) {
         val itemView = layoutInflater.inflate(R.layout.item_subject_schedule, scheduleContainer, false)
         val tvName = itemView.findViewById<TextView>(R.id.tvSubjectName)
         val ivExpand = itemView.findViewById<ImageView>(R.id.ivExpandIcon)
@@ -334,8 +332,11 @@ class EditProfileActivity : AppCompatActivity() {
         val btnAddHorario = itemView.findViewById<LinearLayout>(R.id.btnAddHorarioMateria)
         val btnSaveSchedule = itemView.findViewById<LinearLayout>(R.id.btnSaveSchedule)
         val btnToggleMateria = itemView.findViewById<MaterialSwitch>(R.id.btnToggleMateria)
+        val tvQuantHoras = itemView.findViewById<TextView>(R.id.tvHours)
 
         tvName.text = name
+        // Convert quantHoras to Float before formatting
+        tvQuantHoras.text = String.format("%.1fh", quantHoras?.toFloat() ?: 0.0f)
         btnToggleMateria.isChecked = status
 
 
