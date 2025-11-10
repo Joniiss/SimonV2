@@ -29,6 +29,7 @@ class ChatActivity : AppCompatActivity() {
 
     private lateinit var recycler: RecyclerView
     private lateinit var input: EditText
+    private lateinit var btnBack: ImageButton
     private lateinit var sendBtn: ImageButton
 
     private lateinit var layoutManager: LinearLayoutManager
@@ -38,6 +39,7 @@ class ChatActivity : AppCompatActivity() {
     private var lastVisible: DocumentSnapshot? = null
     private var isLoadingMore = false
     private var reachedEnd = false
+    private val userCache = HashMap<String, Pair<String, String?>>() // uid -> (nome, fotoUrl)
 
     private val currentChannelId: String by lazy {
         intent.getStringExtra(EXTRA_CHANNEL_ID)
@@ -49,9 +51,12 @@ class ChatActivity : AppCompatActivity() {
         setContentView(R.layout.activity_chat) // teu layout atual
 
         // IDs que devem existir no teu layout:
+        btnBack = findViewById(R.id.btnBack)
         recycler = findViewById(R.id.recyclerChat)
         input = findViewById(R.id.edtMessage)
         sendBtn = findViewById(R.id.btnSend)
+
+        btnBack.setOnClickListener { finish() }
 
         layoutManager = LinearLayoutManager(this).apply {
             reverseLayout = true   // mensagens mais novas no topo

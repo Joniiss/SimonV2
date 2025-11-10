@@ -16,8 +16,6 @@ import com.google.android.material.card.MaterialCardView
 class HomeActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityHomeBinding
-    val repo = ChatRepository()
-    val otherUid = "MlQdNQEy0bgJn7b6HNjhEg7GaJx1"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -62,27 +60,7 @@ class HomeActivity : AppCompatActivity() {
         }
 
         binding.ivChat.setOnClickListener {
-
-
-            repo.createOrGetDirectChannel(
-                otherUid = otherUid,
-                onSuccess = { channelId ->
-                    // Já existe ou acabou de ser criado.
-                    // Agora abrimos o ChatActivity, passando o ID do canal.
-                    repo.sendText(
-                        channelId = channelId,
-                        text = "Olá do seed!",
-                        onOk = { /* ok, mensagem criada */ },
-                        onError = { /* erro */ }
-                    )
-                    val intent = Intent(this, ChatActivity::class.java)
-                    intent.putExtra(ChatActivity.EXTRA_CHANNEL_ID, channelId)
-                    startActivity(intent)
-                },
-                onError = { e ->
-                    Toast.makeText(this, "Erro ao criar canal: ${e.message}", Toast.LENGTH_SHORT).show()
-                }
-            )
+            startActivity(Intent(this, ChatsListActivity::class.java))
         }
     }
 }
