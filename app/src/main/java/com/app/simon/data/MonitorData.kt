@@ -15,7 +15,7 @@ data class MonitorData (
     val horarioDisponivel: ArrayList<HorariosData>,
     val disciplina: String,
     val disciplinaId: String,
-    val status: java.lang.Boolean,
+    val status: Boolean,
     val sala: String,
     val local: String,
     val remuneracao: Any,
@@ -23,5 +23,6 @@ data class MonitorData (
     val foto: String,
     val cargaHoraria: Integer,
     val aprovacao: Integer,
-    val geoLoc: GeoData? = GeoData(latitude=-22.9797, longitude=-43.2333)
+    val geoLoc: GeoData? = GeoData(latitude=-22.9797, longitude=-43.2333),
+    val quantHoras: Number? = 0
 ) : Serializable

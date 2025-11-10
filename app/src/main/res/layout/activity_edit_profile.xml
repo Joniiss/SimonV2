@@ -144,6 +144,26 @@
                         android:layout_marginEnd="8dp" />
                 </LinearLayout>
 
+                <LinearLayout
+                    android:id="@+id/btnSalvar"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="24dp"
+                    android:orientation="horizontal"
+                    android:gravity="center"
+                    android:background="@drawable/bg_btn_access"
+                    android:paddingVertical="12dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Salvar alterações"
+                        android:textColor="#FFFFFF"
+                        android:textStyle="bold"
+                        android:textSize="16sp"
+                        android:layout_marginEnd="8dp" />
+                </LinearLayout>
+
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -166,25 +186,6 @@
                     android:layout_marginTop="12dp"
                     android:layout_marginBottom="16dp" />
 
-                <LinearLayout
-                    android:id="@+id/btnSalvar"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="24dp"
-                    android:orientation="horizontal"
-                    android:gravity="center"
-                    android:background="@drawable/bg_btn_access"
-                    android:paddingVertical="12dp">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Salvar alterações"
-                        android:textColor="#FFFFFF"
-                        android:textStyle="bold"
-                        android:textSize="16sp"
-                        android:layout_marginEnd="8dp" />
-                </LinearLayout>
 
             </LinearLayout>
         </ScrollView>

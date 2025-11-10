@@ -29,7 +29,7 @@ class HomeActivity : AppCompatActivity() {
         val shadowColor = 0xAD0C2E92.toInt() // #0C2E92AD
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            listOf(binding.cardSubjects, binding.cardEnlist, binding.cardMyTutoring).forEach { card ->
+            listOf(binding.cardSubjects, binding.cardMyTutoring).forEach { card ->
                 card.outlineSpotShadowColor = shadowColor
                 card.outlineAmbientShadowColor = shadowColor
             }
@@ -61,6 +61,12 @@ class HomeActivity : AppCompatActivity() {
 
         binding.ivChat.setOnClickListener {
             startActivity(Intent(this, ChatsListActivity::class.java))
+        }
+
+        binding.ivUserImg.setOnClickListener {
+            val intent = Intent(this, EditProfileActivity::class.java)
+            intent.putExtra("user", user)
+            startActivity(intent)
         }
     }
 }
