@@ -32,7 +32,7 @@
                 android:id="@+id/tvUser"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Hi, Luan"
+                android:text="Olá, "
                 android:textStyle="bold"
                 android:textSize="22sp"
                 android:textColor="@android:color/white"/>

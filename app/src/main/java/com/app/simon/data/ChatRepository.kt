@@ -1,21 +1,57 @@
 package com.app.simon.data
 
-import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.firestore.*
+import com.google.firebase.storage.FirebaseStorage
 
 class ChatRepository(
     private val auth: FirebaseAuth = FirebaseAuth.getInstance(),
-    private val db: FirebaseFirestore = FirebaseFirestore.getInstance()
+    private val db: FirebaseFirestore = FirebaseFirestore.getInstance(),
+    private val storage: FirebaseStorage = FirebaseStorage.getInstance(),
+    private val rtdb: FirebaseDatabase = FirebaseDatabase.getInstance()
 ) {
+
+    private val nomeCache = mutableMapOf<String, String>()
+
     private fun uid(): String =
         auth.currentUser?.uid ?: throw IllegalStateException("Usuário não autenticado")
 
-    private fun channels(): CollectionReference =
+    private fun chats(): CollectionReference =
         db.collection("Chats")
 
     private fun messages(channelId: String): CollectionReference =
-        channels().document(channelId).collection("messages")
+        chats().document(channelId).collection("messages")
+
+    private fun getUserName(uid: String, onResult: (String?) -> Unit) {
+        nomeCache[uid]?.let { onResult(it); return }
+        val db = FirebaseFirestore.getInstance()
+        val dbAluno = db.collection("Alunos")
+        val dbProfessor = db.collection("Professores")
+
+        dbAluno.whereEqualTo("uid", uid).limit(1).get()
+            .addOnSuccessListener { snap ->
+                if (!snap.isEmpty) {
+                    val doc = snap.documents.first()
+                    val nome = doc.getString("nome")
+                    nomeCache[uid] = nome ?: uid
+                    onResult(nome)
+                } else {
+                    dbProfessor.whereEqualTo("uid", uid).limit(1).get()
+                        .addOnSuccessListener { snap2 ->
+                            if (!snap2.isEmpty) {
+                                val doc = snap2.documents.first()
+                                val nome = doc.getString("nome")
+                                nomeCache[uid] = nome ?: uid
+                                onResult(nome)
+                            } else { onResult(null) }
+                        }
+                        .addOnFailureListener { onResult(null) }
+                }
+            }
+            .addOnFailureListener { onResult(null) }
+    }
 
     /** ID determinístico para canal 1:1: min(uidA, uidB) + "_" + max(uidA, uidB) */
     fun directChannelIdOf(a: String, b: String): String =
@@ -32,6 +68,7 @@ class ChatRepository(
     ): ListenerRegistration {
         return messages(channelId)
             .orderBy("createdAt", Query.Direction.DESCENDING)
+            .orderBy(FieldPath.documentId())
             .limit(pageSize)
             .addSnapshotListener { snap, e ->
                 if (e != null) { onError(e); return@addSnapshotListener }
@@ -49,8 +86,19 @@ class ChatRepository(
         onSuccess: (QuerySnapshot) -> Unit,
         onError: (Exception) -> Unit
     ) {
-        messages(channelId)
+        val db = FirebaseFirestore.getInstance()
+/*
+        val ts = lastVisible.getTimestamp("createdAt")
+        if (ts == null || lastVisible.metadata.hasPendingWrites()) {
+            onError(IllegalStateException("Timestamp inválido"))
+            return
+        }*/
+
+        db.collection("Chats")
+            .document(channelId)
+            .collection("messages")
             .orderBy("createdAt", Query.Direction.DESCENDING)
+            .orderBy(FieldPath.documentId())
             .startAfter(lastVisible)
             .limit(pageSize)
             .get()
@@ -78,7 +126,7 @@ class ChatRepository(
                 "attachments" to emptyList<Any>(),
                 "status" to mapOf("deliveredTo" to emptyList<String>(), "readBy" to listOf(me))
             ))
-            b.update(channels().document(channelId), mapOf(
+            b.update(chats().document(channelId), mapOf(
                 "lastMessage" to text,
                 "lastMessageBy" to me,
                 "lastMessageAt" to FieldValue.serverTimestamp()
@@ -108,6 +156,20 @@ class ChatRepository(
         batch.commit().addOnSuccessListener { onDone() }.addOnFailureListener(onError)
     }
 
+    private fun typingRef(channelId: String): DatabaseReference =
+        rtdb.reference.child("typing").child(channelId)
+
+    fun setTyping(channelId: String, typing: Boolean) {
+        val me = uid()
+        val ref = typingRef(channelId).child(me)
+        if (typing) {
+            ref.setValue(true)
+            ref.onDisconnect().removeValue()
+        } else {
+            ref.removeValue()
+        }
+    }
+
     /**
      * Cria (se não existir) ou retorna o ID do canal 1:1 entre o usuário logado e otherUid.
      * @param otherUid UID do destinatário
@@ -121,7 +183,7 @@ class ChatRepository(
     ) {
         val me = uid()
         val channelId = directChannelIdOf(me, otherUid)
-        val docRef = channels().document(channelId)
+        val docRef = chats().document(channelId)
 
         docRef.get()
             .addOnSuccessListener { snap ->
@@ -164,7 +226,7 @@ class ChatRepository(
         val me = uid()
         require(memberUids.contains(me)) { "O usuário logado precisa estar em memberUids" }
 
-        val docRef = channels().document(channelId)
+        val docRef = chats().document(channelId)
         val data = hashMapOf(
             "type" to "group",
             "name" to name,

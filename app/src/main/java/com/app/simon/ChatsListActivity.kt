@@ -23,11 +23,11 @@ class ChatsListActivity : AppCompatActivity() {
     private val auth: FirebaseAuth by lazy { FirebaseAuth.getInstance() }
     private val db: FirebaseFirestore by lazy { FirebaseFirestore.getInstance() }
 
+    private val nomeCache = mutableMapOf<String, String>() // uid -> nome
     private lateinit var edtSearch: EditText
     private lateinit var recycler: RecyclerView
     private lateinit var btnBack: ImageButton
     private lateinit var progress: ProgressBar
-
     private lateinit var adapter: ChatsAdapter
     private var reg: ListenerRegistration? = null
 
@@ -36,6 +36,50 @@ class ChatsListActivity : AppCompatActivity() {
 
     // lista mestre para filtrar localmente
     private val fullList = mutableListOf<ChatChannelItem>()
+
+    private fun getUserName(uid: String, onResult: (String) -> Unit) {
+        // 1) tenta cache primeiro
+        nomeCache[uid]?.let { onResult(it); return }
+
+        val dbAluno = db.collection("Alunos")
+        val dbProfessor = db.collection("Professores")
+
+        // tenta em Alunos
+        dbAluno.whereEqualTo("uid", uid).limit(1).get()
+            .addOnSuccessListener { snap ->
+                if (!snap.isEmpty) {
+                    val doc = snap.documents.first()
+                    val nome = doc.getString("nome") ?: uid
+                    nomeCache[uid] = nome
+                    onResult(nome)
+                } else {
+                    // tenta em Professores
+                    dbProfessor.whereEqualTo("uid", uid).limit(1).get()
+                        .addOnSuccessListener { snap2 ->
+                            if (!snap2.isEmpty) {
+                                val doc = snap2.documents.first()
+                                val nome = doc.getString("nome") ?: uid
+                                nomeCache[uid] = nome
+                                onResult(nome)
+                            } else {
+                                // não achou em nenhum dos dois
+                                onResult(uid)
+                            }
+                        }
+                        .addOnFailureListener { onResult(uid) }
+                }
+            }
+            .addOnFailureListener { onResult(uid) }
+    }
+
+    private fun resolveAndRefresh(channelId: String, title: String) {
+        val idx = fullList.indexOfFirst { it.channelId == channelId }
+        if (idx >= 0) {
+            val old = fullList[idx]
+            fullList[idx] = old.copy(title = title)
+            adapter.submitList(fullList.toList())
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -167,7 +211,6 @@ class ChatsListActivity : AppCompatActivity() {
 
     private fun buildItems(me: String, snap: QuerySnapshot) {
         fullList.clear()
-        val tasks = mutableListOf<com.google.android.gms.tasks.Task<DocumentSnapshot>>()
 
         for (doc in snap.documents) {
             val channelId = doc.id
@@ -177,45 +220,36 @@ class ChatsListActivity : AppCompatActivity() {
             val members = (data["members"] as? List<*>)?.map { it.toString() } ?: emptyList()
             val lastMessage = data["lastMessage"]?.toString() ?: ""
             val lastMessageAt = data["lastMessageAt"] as? Timestamp
-            val nameFromDoc = data["name"]?.toString() // pode existir em grupo
+            val nameFromDoc = data["name"]?.toString()
 
-            // título: se for grupo, usa "name"; se for direct, pega o "outro" user
-            var title = nameFromDoc
-            var photoUrl: String? = null
+            var title = nameFromDoc ?: "Conversa"
 
-            if (title.isNullOrBlank() && type == "direct") {
+            // 🔹 Se for 1:1 e não tiver name no documento, usa o nome do outro usuário
+            if (type == "direct" && nameFromDoc.isNullOrBlank()) {
                 val other = members.firstOrNull { it != me }
                 if (other != null) {
-                    val cached = userCache[other]
+                    // tenta cache primeiro
+                    val cached = nomeCache[other]
                     if (cached != null) {
-                        title = cached.first
-                        photoUrl = cached.second
+                        title = cached
                     } else {
-                        // carrega user/other e guarda para a próxima
-                        val t = db.collection("users").document(other).get()
-                            .addOnSuccessListener { u ->
-                                val display = u.getString("displayName") ?: other
-                                val photo = u.getString("photoURL")
-                                userCache[other] = display to photo
-                                // atualiza item dessa conversa na lista após resolver nome
-                                resolveAndRefresh(channelId, display, photo)
-                            }
-                        tasks.add(t)
+                        // busca de forma assíncrona e atualiza depois
+                        getUserName(other) { nomeResolved ->
+                            resolveAndRefresh(channelId, nomeResolved)
+                        }
                     }
                 }
             }
 
             val item = ChatChannelItem(
                 channelId = channelId,
-                title = title ?: "Conversa",
+                title = title,
                 lastMessage = lastMessage,
-                lastMessageAt = lastMessageAt,
-                photoUrl = photoUrl
+                lastMessageAt = lastMessageAt
             )
             fullList.add(item)
         }
 
-        // Mostra imediatamente com o que já temos; updates virão ao resolver nomes
         adapter.submitList(fullList.toList())
     }
 

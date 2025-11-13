@@ -5,6 +5,7 @@ import android.text.TextUtils
 import android.view.inputmethod.EditorInfo
 import android.widget.EditText
 import android.widget.ImageButton
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -13,6 +14,7 @@ import com.app.simon.data.ChatMessage
 import com.app.simon.data.ChatRepository
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentSnapshot
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.QuerySnapshot
 
@@ -23,6 +25,12 @@ class ChatActivity : AppCompatActivity() {
         const val EXTRA_CHANNEL_ID = "channel_id"
         private const val PAGE_SIZE = 20L
     }
+
+// ...
+
+    private lateinit var titleView: TextView
+    private val db: FirebaseFirestore by lazy { FirebaseFirestore.getInstance() }
+    private val nomeCache = mutableMapOf<String, String>() // pode ser compartilhado com adapter se quiser
 
     private val auth: FirebaseAuth by lazy { FirebaseAuth.getInstance() }
     private val repo = ChatRepository(auth = auth)
@@ -55,6 +63,7 @@ class ChatActivity : AppCompatActivity() {
         recycler = findViewById(R.id.recyclerChat)
         input = findViewById(R.id.edtMessage)
         sendBtn = findViewById(R.id.btnSend)
+        titleView = findViewById(R.id.tvTitle)
 
         btnBack.setOnClickListener { finish() }
 
@@ -66,6 +75,7 @@ class ChatActivity : AppCompatActivity() {
         recycler.layoutManager = layoutManager
         recycler.adapter = adapter
 
+        loadChatTitle()
         setupPaginationScroll()
         setupSendActions()
 
@@ -89,6 +99,73 @@ class ChatActivity : AppCompatActivity() {
                 true
             } else false
         }
+    }
+
+    private fun getUserName(uid: String, onResult: (String) -> Unit) {
+        nomeCache[uid]?.let { onResult(it); return }
+
+        val dbAluno = db.collection("Alunos")
+        val dbProfessor = db.collection("Professores")
+
+        dbAluno.whereEqualTo("uid", uid).limit(1).get()
+            .addOnSuccessListener { snap ->
+                if (!snap.isEmpty) {
+                    val doc = snap.documents.first()
+                    val nome = doc.getString("nome") ?: uid
+                    nomeCache[uid] = nome
+                    onResult(nome)
+                } else {
+                    dbProfessor.whereEqualTo("uid", uid).limit(1).get()
+                        .addOnSuccessListener { snap2 ->
+                            if (!snap2.isEmpty) {
+                                val doc = snap2.documents.first()
+                                val nome = doc.getString("nome") ?: uid
+                                nomeCache[uid] = nome
+                                onResult(nome)
+                            } else {
+                                onResult(uid)
+                            }
+                        }
+                        .addOnFailureListener { onResult(uid) }
+                }
+            }
+            .addOnFailureListener { onResult(uid) }
+    }
+
+    private fun loadChatTitle() {
+        val me = auth.currentUser?.uid ?: return
+
+        db.collection("Chats").document(currentChannelId).get()
+            .addOnSuccessListener { doc ->
+                if (!doc.exists()) {
+                    titleView.text = "Conversa"
+                    return@addOnSuccessListener
+                }
+
+                val type = doc.getString("type") ?: "direct"
+                val nameFromDoc = doc.getString("name")
+                val members = doc.get("members") as? List<*> ?: emptyList<Any>()
+
+                // Se for grupo e tiver name, usa direto
+                if (type != "direct" && !nameFromDoc.isNullOrBlank()) {
+                    titleView.text = nameFromDoc
+                    return@addOnSuccessListener
+                }
+
+                // Se for direct, pega o "outro" uid
+                val otherUid = members.map { it.toString() }.firstOrNull { it != me }
+                if (otherUid == null) {
+                    titleView.text = "Conversa"
+                    return@addOnSuccessListener
+                }
+
+                getUserName(otherUid) { nome ->
+                    titleView.text = nome
+                }
+            }
+            .addOnFailureListener {
+                titleView.text = "Conversa"
+            }
     }
 
     private fun sendText(text: String) {
@@ -136,19 +213,29 @@ class ChatActivity : AppCompatActivity() {
     }
 
     private fun handleFirstPage(snap: QuerySnapshot) {
-        // docs vêm desc (mais novos primeiro) por causa do reverseLayout = true
         val docs = snap.documents
-        if (docs.isNotEmpty()) lastVisible = docs.last()
 
-        val list = docs.map { it.toObject(ChatMessage::class.java)!!.copy(id = it.id) }
+        // Âncora segura: último doc que já tem createdAt confirmado e não é pending write
+        lastVisible = docs.lastOrNull { d ->
+            d.getTimestamp("createdAt") != null && !d.metadata.hasPendingWrites()
+        }
+
+        // Converte para modelo
+        val list = docs.mapNotNull { d ->
+            d.toObject(ChatMessage::class.java)?.copy(id = d.id)
+        }
+
         adapter.submitList(list)
 
-        // marca como lidas as mensagens visíveis
+        // marca como lidas as visíveis
         repo.markAsRead(
             docs = docs,
             onDone = { /* ok */ },
-            onError = { /* ignore silencioso ou log */ }
+            onError = { /* log opcional */ }
         )
+
+        // opcional: detectar fim logo na 1ª página
+        reachedEnd = docs.size < PAGE_SIZE
     }
 
     /**

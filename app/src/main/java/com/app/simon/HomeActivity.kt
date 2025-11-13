@@ -8,18 +8,22 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import com.app.simon.data.ChatRepository
 import com.app.simon.data.User
 import com.app.simon.databinding.ActivityHomeBinding
-import com.google.android.material.card.MaterialCardView
+import com.google.firebase.Firebase
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.auth
 
 class HomeActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityHomeBinding
+    private lateinit var auth: FirebaseAuth
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
+        auth = Firebase.auth
 
         // Inicializa o binding
         binding = ActivityHomeBinding.inflate(layoutInflater)
@@ -44,6 +48,7 @@ class HomeActivity : AppCompatActivity() {
 
         val user = intent.getSerializableExtra("user") as User
         Toast.makeText(baseContext, user.nome, Toast.LENGTH_SHORT).show()
+        binding.tvUser.text = "Olá, ${user.nome}"
 
         // Clique no cardSubjects -> abrir CoursesListActivity
         binding.cardSubjects.setOnClickListener {
@@ -67,6 +72,13 @@ class HomeActivity : AppCompatActivity() {
             val intent = Intent(this, EditProfileActivity::class.java)
             intent.putExtra("user", user)
             startActivity(intent)
+        }
+
+        binding.tvLogout.setOnClickListener {
+            auth.signOut()
+            val intent = Intent(this, FirstPageActivity::class.java)
+            startActivity(intent)
+            finish()
         }
     }
 }
