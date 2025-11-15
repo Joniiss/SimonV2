@@ -48,7 +48,7 @@ class HomeActivity : AppCompatActivity() {
 
         val user = intent.getSerializableExtra("user") as User
         Toast.makeText(baseContext, user.nome, Toast.LENGTH_SHORT).show()
-        binding.tvUser.text = "Olá, ${user.nome}"
+        binding.tvUser.text = "Olá, ${getFirstName(user.nome)}"
 
         // Clique no cardSubjects -> abrir CoursesListActivity
         binding.cardSubjects.setOnClickListener {
@@ -80,5 +80,10 @@ class HomeActivity : AppCompatActivity() {
             startActivity(intent)
             finish()
         }
+    }
+
+    private fun getFirstName(nome: String): String {
+        val spaceIndex = nome.indexOf(' ')
+        return if (spaceIndex == -1) nome else nome.take(spaceIndex)
     }
 }

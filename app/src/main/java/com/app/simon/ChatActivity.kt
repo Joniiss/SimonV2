@@ -112,16 +112,16 @@ class ChatActivity : AppCompatActivity() {
                 if (!snap.isEmpty) {
                     val doc = snap.documents.first()
                     val nome = doc.getString("nome") ?: uid
-                    nomeCache[uid] = nome
-                    onResult(nome)
+                    nomeCache[uid] = getFirstName(nome)
+                    onResult(getFirstName(nome))
                 } else {
                     dbProfessor.whereEqualTo("uid", uid).limit(1).get()
                         .addOnSuccessListener { snap2 ->
                             if (!snap2.isEmpty) {
                                 val doc = snap2.documents.first()
                                 val nome = doc.getString("nome") ?: uid
-                                nomeCache[uid] = nome
-                                onResult(nome)
+                                nomeCache[uid] = getFirstName(nome)
+                                onResult(getFirstName(nome))
                             } else {
                                 onResult(uid)
                             }
@@ -290,5 +290,10 @@ class ChatActivity : AppCompatActivity() {
                 // exibe erro conforme padrão do app
             }
         )
+    }
+
+    private fun getFirstName(nome: String): String {
+        val spaceIndex = nome.indexOf(' ')
+        return if (spaceIndex == -1) nome else nome.take(spaceIndex)
     }
 }
