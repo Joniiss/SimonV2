@@ -36,6 +36,7 @@ import com.google.android.gms.location.Priority
 import android.net.Uri
 import androidx.appcompat.widget.SwitchCompat
 import androidx.core.content.FileProvider
+import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.google.android.material.materialswitch.MaterialSwitch
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.storage
@@ -117,6 +118,8 @@ class EditProfileActivity : AppCompatActivity() {
 
         Glide.with(this)
             .load(user.foto)
+            .diskCacheStrategy(DiskCacheStrategy.NONE)
+            .skipMemoryCache(true)
             .into(binding.profileImage)
 
         binding.tvNome.text = user.nome
