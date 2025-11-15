@@ -32,7 +32,7 @@
                 android:id="@+id/tvUser"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Hi, Luan"
+                android:text="Olá, "
                 android:textStyle="bold"
                 android:textSize="22sp"
                 android:textColor="@android:color/white"/>
@@ -52,7 +52,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="24dp"
-            android:text="| Log Out"
+            android:text="@string/logout"
             android:textColor="@android:color/white"
             android:textSize="22sp"
             android:drawableEnd="@drawable/ic_logout"

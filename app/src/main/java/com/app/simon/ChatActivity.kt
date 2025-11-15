@@ -1,0 +1,294 @@
+package com.app.simon
+
+import android.os.Bundle
+import android.text.TextUtils
+import android.view.inputmethod.EditorInfo
+import android.widget.EditText
+import android.widget.ImageButton
+import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.app.simon.adapter.ChatMessagesAdapter
+import com.app.simon.data.ChatMessage
+import com.app.simon.data.ChatRepository
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.DocumentSnapshot
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ListenerRegistration
+import com.google.firebase.firestore.QuerySnapshot
+
+class ChatActivity : AppCompatActivity() {
+
+    companion object {
+        // Passe esse channelId via Intent extra ou calcule determinístico p/ 1:1
+        const val EXTRA_CHANNEL_ID = "channel_id"
+        private const val PAGE_SIZE = 20L
+    }
+
+// ...
+
+    private lateinit var titleView: TextView
+    private val db: FirebaseFirestore by lazy { FirebaseFirestore.getInstance() }
+    private val nomeCache = mutableMapOf<String, String>() // pode ser compartilhado com adapter se quiser
+
+    private val auth: FirebaseAuth by lazy { FirebaseAuth.getInstance() }
+    private val repo = ChatRepository(auth = auth)
+
+    private lateinit var recycler: RecyclerView
+    private lateinit var input: EditText
+    private lateinit var btnBack: ImageButton
+    private lateinit var sendBtn: ImageButton
+
+    private lateinit var layoutManager: LinearLayoutManager
+    private lateinit var adapter: ChatMessagesAdapter
+
+    private var liveReg: ListenerRegistration? = null
+    private var lastVisible: DocumentSnapshot? = null
+    private var isLoadingMore = false
+    private var reachedEnd = false
+    private val userCache = HashMap<String, Pair<String, String?>>() // uid -> (nome, fotoUrl)
+
+    private val currentChannelId: String by lazy {
+        intent.getStringExtra(EXTRA_CHANNEL_ID)
+            ?: throw IllegalStateException("EXTRA_CHANNEL_ID ausente")
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_chat) // teu layout atual
+
+        // IDs que devem existir no teu layout:
+        btnBack = findViewById(R.id.btnBack)
+        recycler = findViewById(R.id.recyclerChat)
+        input = findViewById(R.id.edtMessage)
+        sendBtn = findViewById(R.id.btnSend)
+        titleView = findViewById(R.id.tvTitle)
+
+        btnBack.setOnClickListener { finish() }
+
+        layoutManager = LinearLayoutManager(this).apply {
+            reverseLayout = true   // mensagens mais novas no topo
+            stackFromEnd = false
+        }
+        adapter = ChatMessagesAdapter { auth.currentUser?.uid ?: "" }
+        recycler.layoutManager = layoutManager
+        recycler.adapter = adapter
+
+        loadChatTitle()
+        setupPaginationScroll()
+        setupSendActions()
+
+        startListening()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        stopListening()
+    }
+
+    private fun setupSendActions() {
+        sendBtn.setOnClickListener {
+            val text = input.text?.toString()?.trim() ?: ""
+            if (text.isNotEmpty()) sendText(text)
+        }
+        input.setOnEditorActionListener { _, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_SEND) {
+                val text = input.text?.toString()?.trim() ?: ""
+                if (text.isNotEmpty()) sendText(text)
+                true
+            } else false
+        }
+    }
+
+    private fun getUserName(uid: String, onResult: (String) -> Unit) {
+        nomeCache[uid]?.let { onResult(it); return }
+
+        val dbAluno = db.collection("Alunos")
+        val dbProfessor = db.collection("Professores")
+
+        dbAluno.whereEqualTo("uid", uid).limit(1).get()
+            .addOnSuccessListener { snap ->
+                if (!snap.isEmpty) {
+                    val doc = snap.documents.first()
+                    val nome = doc.getString("nome") ?: uid
+                    nomeCache[uid] = nome
+                    onResult(nome)
+                } else {
+                    dbProfessor.whereEqualTo("uid", uid).limit(1).get()
+                        .addOnSuccessListener { snap2 ->
+                            if (!snap2.isEmpty) {
+                                val doc = snap2.documents.first()
+                                val nome = doc.getString("nome") ?: uid
+                                nomeCache[uid] = nome
+                                onResult(nome)
+                            } else {
+                                onResult(uid)
+                            }
+                        }
+                        .addOnFailureListener { onResult(uid) }
+                }
+            }
+            .addOnFailureListener { onResult(uid) }
+    }
+
+    private fun loadChatTitle() {
+        val me = auth.currentUser?.uid ?: return
+
+        db.collection("Chats").document(currentChannelId).get()
+            .addOnSuccessListener { doc ->
+                if (!doc.exists()) {
+                    titleView.text = "Conversa"
+                    return@addOnSuccessListener
+                }
+
+                val type = doc.getString("type") ?: "direct"
+                val nameFromDoc = doc.getString("name")
+                val members = doc.get("members") as? List<*> ?: emptyList<Any>()
+
+                // Se for grupo e tiver name, usa direto
+                if (type != "direct" && !nameFromDoc.isNullOrBlank()) {
+                    titleView.text = nameFromDoc
+                    return@addOnSuccessListener
+                }
+
+                // Se for direct, pega o "outro" uid
+                val otherUid = members.map { it.toString() }.firstOrNull { it != me }
+                if (otherUid == null) {
+                    titleView.text = "Conversa"
+                    return@addOnSuccessListener
+                }
+
+                getUserName(otherUid) { nome ->
+                    titleView.text = nome
+                }
+            }
+            .addOnFailureListener {
+                titleView.text = "Conversa"
+            }
+    }
+
+    private fun sendText(text: String) {
+        disableInput()
+        repo.sendText(
+            channelId = currentChannelId,
+            text = text,
+            onOk = {
+                input.text?.clear()
+                enableInput()
+            },
+            onError = {
+                // exibe erro conforme padrão do teu app
+                enableInput()
+            }
+        )
+    }
+
+    private fun disableInput() {
+        sendBtn.isEnabled = false
+        input.isEnabled = false
+    }
+    private fun enableInput() {
+        sendBtn.isEnabled = true
+        input.isEnabled = true
+    }
+
+    /**
+     * Primeira página em tempo real
+     */
+    private fun startListening() {
+        stopListening()
+        reachedEnd = false
+        liveReg = repo.watchFirstPage(
+            channelId = currentChannelId,
+            pageSize = PAGE_SIZE,
+            onUpdate = { snap -> handleFirstPage(snap) },
+            onError = { /* mostra erro */ }
+        )
+    }
+
+    private fun stopListening() {
+        liveReg?.remove()
+        liveReg = null
+    }
+
+    private fun handleFirstPage(snap: QuerySnapshot) {
+        val docs = snap.documents
+
+        // Âncora segura: último doc que já tem createdAt confirmado e não é pending write
+        lastVisible = docs.lastOrNull { d ->
+            d.getTimestamp("createdAt") != null && !d.metadata.hasPendingWrites()
+        }
+
+        // Converte para modelo
+        val list = docs.mapNotNull { d ->
+            d.toObject(ChatMessage::class.java)?.copy(id = d.id)
+        }
+
+        adapter.submitList(list)
+
+        // marca como lidas as visíveis
+        repo.markAsRead(
+            docs = docs,
+            onDone = { /* ok */ },
+            onError = { /* log opcional */ }
+        )
+
+        // opcional: detectar fim logo na 1ª página
+        reachedEnd = docs.size < PAGE_SIZE
+    }
+
+    /**
+     * Scroll para carregar mais quando chegar perto do fim
+     */
+    private fun setupPaginationScroll() {
+        recycler.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrolled(rv: RecyclerView, dx: Int, dy: Int) {
+                super.onScrolled(rv, dx, dy)
+                if (reachedEnd || isLoadingMore) return
+
+                val total = layoutManager.itemCount
+                val lastVisiblePos = layoutManager.findLastVisibleItemPosition()
+                val shouldLoad = lastVisiblePos >= total - 5 // margem de segurança
+
+                if (shouldLoad) loadMore()
+            }
+        })
+    }
+
+    private fun loadMore() {
+        val anchor = lastVisible ?: return
+        isLoadingMore = true
+
+        repo.loadMore(
+            channelId = currentChannelId,
+            lastVisible = anchor,
+            pageSize = PAGE_SIZE,
+            onSuccess = { snap ->
+                val docs = snap.documents
+                if (docs.isEmpty()) {
+                    reachedEnd = true
+                    isLoadingMore = false
+                    return@loadMore
+                }
+                lastVisible = docs.last()
+
+                // Lista atual (novas no topo)
+                val current = adapter.currentList.toMutableList()
+                val more = docs.map { it.toObject(ChatMessage::class.java)!!.copy(id = it.id) }
+                current.addAll(more)
+
+                adapter.submitList(current)
+
+                // marcar como lidas também
+                repo.markAsRead(docs, onDone = { }, onError = { })
+
+                isLoadingMore = false
+            },
+            onError = {
+                isLoadingMore = false
+                // exibe erro conforme padrão do app
+            }
+        )
+    }
+}

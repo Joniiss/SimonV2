@@ -1,7 +1,7 @@
 package com.app.simon
 
+import android.content.Intent
 import android.graphics.Color
-import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.view.View
 import android.widget.LinearLayout
@@ -10,15 +10,10 @@ import android.widget.ImageView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
-import androidx.recyclerview.widget.LinearLayoutManager
-import com.app.simon.adapter.MonitorCoursesAdapter
 import com.app.simon.adapter.MonitorsAdapter.MonitorsViewHolder.ProximoHorarioSlot
 import com.app.simon.adapter.toDayOfWeek
 import com.app.simon.data.HorariosData
 import com.app.simon.data.MonitorData
-import com.app.simon.data.User
 import com.app.simon.databinding.ActivityProfileBinding
 import com.beust.klaxon.Klaxon
 import com.bumptech.glide.Glide
@@ -30,6 +25,9 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.gms.tasks.Task
 import com.google.firebase.Firebase
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FieldValue
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.functions.FirebaseFunctions
 import com.google.firebase.functions.FirebaseFunctionsException
 import com.google.firebase.functions.functions
@@ -43,13 +41,11 @@ class ProfileActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private lateinit var binding: ActivityProfileBinding
     private lateinit var subjectsContainer: LinearLayout
-
     private lateinit var functions: FirebaseFunctions
-
     private val gson = GsonBuilder().enableComplexMapKeySerialization().create()
     private var googleMap: GoogleMap? = null
-
     private lateinit var location: LatLng
+    private lateinit var monitor: MonitorData
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -68,8 +64,8 @@ class ProfileActivity : AppCompatActivity(), OnMapReadyCallback {
 
         subjectsContainer = findViewById(R.id.subjectsContainer)
 
-        val monitor = intent.getSerializableExtra("monitor") as MonitorData
-        location = LatLng(monitor.geoLoc!!.latitude, monitor.geoLoc.longitude)
+        monitor = intent.getSerializableExtra("monitor") as MonitorData
+        location = LatLng(monitor.geoLoc!!.latitude, monitor.geoLoc!!.longitude)
 
         binding.tvNome.text = monitor.nome
         binding.tvLocalValue.text = "${monitor.local} - ${monitor.sala}"
@@ -127,6 +123,10 @@ class ProfileActivity : AppCompatActivity(), OnMapReadyCallback {
             }
         binding.btnClose.setOnClickListener {
             finish()
+        }
+
+        binding.btnIniciarConversa.setOnClickListener {
+            iniciarChat()
         }
     }
 
@@ -267,4 +267,52 @@ class ProfileActivity : AppCompatActivity(), OnMapReadyCallback {
 
         return proximoSlotEncontrado
     }
+
+    private fun iniciarChat() {
+        val me = FirebaseAuth.getInstance().currentUser?.uid
+        val other = monitor.uid
+        if (me.isNullOrBlank() || other.isNullOrBlank()) {
+            Toast.makeText(this, "Usuário inválido para iniciar chat.", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        // ID determinístico para chat 1:1: dm_<uidMenor>_<uidMaior>
+        val channelId = directChannelId(me, other)
+
+        val db = FirebaseFirestore.getInstance()
+        val ref = db.collection("Chats").document(channelId)
+
+        // Cria o canal só se não existir (em transação)
+        db.runTransaction { tx ->
+            val snap = tx.get(ref)
+            if (!snap.exists()) {
+                val members = listOf(me, other)
+                val data = hashMapOf(
+                    "type" to "direct",
+                    "members" to members,
+                    "createdBy" to me,
+                    "createdAt" to FieldValue.serverTimestamp(),
+                    // estes dois ajudam na tela de lista:
+                    "lastMessage" to "",
+                    "lastMessageAt" to FieldValue.serverTimestamp()
+                    // opcional: "name" caso você queira dar um nome fixo em grupos
+                )
+                tx.set(ref, data)
+            }
+            null
+        }.addOnSuccessListener {
+            // Abre o chat
+            val it = Intent(this, ChatActivity::class.java)
+            it.putExtra(ChatActivity.EXTRA_CHANNEL_ID, channelId)
+            startActivity(it)
+        }.addOnFailureListener { e ->
+            Toast.makeText(this, "Falha ao iniciar chat: ${e.message}", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    /** Gera um ID estável para conversas diretas 1:1 */
+    private fun directChannelId(a: String, b: String): String {
+        return if (a < b) "${a}_$b" else "${b}_$a"
+    }
+
 }
