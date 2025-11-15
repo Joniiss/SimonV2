@@ -45,6 +45,8 @@ class ForumActivity : AppCompatActivity() {
 
         val user = intent.getSerializableExtra("user") as User
         val courseId = intent.getStringExtra("courseId")
+        val courseName = intent.getStringExtra("courseName")
+
 
         mRecyclerView = binding.rvForumPosts
 
@@ -56,9 +58,10 @@ class ForumActivity : AppCompatActivity() {
 
         mAdapter = ForumPostsAdapter(mutableListOf(), user)
 
+        binding.tvSubject.text = courseName
+
         getForumPosts(courseId!!)
             .addOnCompleteListener { task ->
-                Toast.makeText(baseContext, "ENTROU AQUI", Toast.LENGTH_SHORT).show()
                 if (task.isSuccessful) {
                     val genericResp = gson.fromJson(
                         task.result,
@@ -67,17 +70,21 @@ class ForumActivity : AppCompatActivity() {
 
                     println(genericResp.payload)
 
-                    val posts = Klaxon()
-                        .parseArray<ForumData>(genericResp.payload.toString())
-                    val postsData = mutableListOf<ForumPostData>()
-                    for (i in posts!!.indices) {
-                        postsData.add(posts[i].data)
+                    if (genericResp.payload.toString() != "No matching documents.") {
+                        val posts = Klaxon()
+                            .parseArray<ForumData>(genericResp.payload.toString())
+                        val postsData = mutableListOf<ForumPostData>()
+                        for (i in posts!!.indices) {
+                            postsData.add(posts[i].data)
+                        }
+
+                        mAdapter = ForumPostsAdapter(posts!! as MutableList<ForumData>, user)
+
+                        mRecyclerView.layoutManager = LinearLayoutManager(this)
+                        mRecyclerView.adapter = mAdapter
                     }
 
-                    mAdapter = ForumPostsAdapter(posts!! as MutableList<ForumData>, user)
 
-                    mRecyclerView.layoutManager = LinearLayoutManager(this)
-                    mRecyclerView.adapter = mAdapter
                 }
             }
 
@@ -92,6 +99,7 @@ class ForumActivity : AppCompatActivity() {
             val intent = Intent(this, MonitorsListActivity::class.java)
             intent.putExtra("user", user)
             intent.putExtra("courseId", courseId)
+            intent.putExtra("courseName", courseName)
             startActivity(intent)
         }
 
@@ -99,6 +107,7 @@ class ForumActivity : AppCompatActivity() {
             val intent = Intent(this, MuralActivity::class.java)
             intent.putExtra("user", user)
             intent.putExtra("courseId", courseId)
+            intent.putExtra("courseName", courseName)
             startActivity(intent)
         }
 

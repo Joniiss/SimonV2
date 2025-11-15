@@ -25,11 +25,9 @@ class HomeActivity : AppCompatActivity() {
 
         auth = Firebase.auth
 
-        // Inicializa o binding
         binding = ActivityHomeBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // sombra azul customizada
         val shadowColor = 0xAD0C2E92.toInt() // #0C2E92AD
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
@@ -39,7 +37,6 @@ class HomeActivity : AppCompatActivity() {
             }
         }
 
-        // Ajusta padding para as system bars
         ViewCompat.setOnApplyWindowInsetsListener(binding.main) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
@@ -47,17 +44,14 @@ class HomeActivity : AppCompatActivity() {
         }
 
         val user = intent.getSerializableExtra("user") as User
-        Toast.makeText(baseContext, user.nome, Toast.LENGTH_SHORT).show()
         binding.tvUser.text = "Olá, ${getFirstName(user.nome)}"
 
-        // Clique no cardSubjects -> abrir CoursesListActivity
         binding.cardSubjects.setOnClickListener {
             val intent = Intent(this, CoursesListActivity::class.java)
             intent.putExtra("user", user)
             startActivity(intent)
         }
 
-        // Clique no cardSubjects -> abrir CoursesListActivity
         binding.cardMyTutoring.setOnClickListener {
             val intent = Intent(this, MonitorCoursesListActivity::class.java)
             intent.putExtra("user", user)

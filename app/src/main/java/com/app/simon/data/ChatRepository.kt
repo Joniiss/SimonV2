@@ -53,13 +53,9 @@ class ChatRepository(
             .addOnFailureListener { onResult(null) }
     }
 
-    /** ID determinístico para canal 1:1: min(uidA, uidB) + "_" + max(uidA, uidB) */
     fun directChannelIdOf(a: String, b: String): String =
         if (a <= b) "${a}_$b" else "${b}_$a"
 
-    /**
-     * Primeira página: listener em tempo real
-     */
     fun watchFirstPage(
         channelId: String,
         pageSize: Long,
@@ -76,9 +72,6 @@ class ChatRepository(
             }
     }
 
-    /**
-     * Paginação “carregar mais” (pull-to-top)
-     */
     fun loadMore(
         channelId: String,
         lastVisible: DocumentSnapshot,
@@ -87,12 +80,6 @@ class ChatRepository(
         onError: (Exception) -> Unit
     ) {
         val db = FirebaseFirestore.getInstance()
-/*
-        val ts = lastVisible.getTimestamp("createdAt")
-        if (ts == null || lastVisible.metadata.hasPendingWrites()) {
-            onError(IllegalStateException("Timestamp inválido"))
-            return
-        }*/
 
         db.collection("Chats")
             .document(channelId)
@@ -106,9 +93,6 @@ class ChatRepository(
             .addOnFailureListener(onError)
     }
 
-    /**
-     * Enviar texto
-     */
     fun sendText(
         channelId: String,
         text: String,
@@ -135,9 +119,6 @@ class ChatRepository(
             .addOnFailureListener(onError)
     }
 
-    /**
-     * Marcar mensagens como lidas (read receipts simples)
-     */
     fun markAsRead(
         docs: List<DocumentSnapshot>,
         onDone: () -> Unit,

@@ -100,13 +100,17 @@ class NewMuralPostActivity : AppCompatActivity() {
                 val view = containerVideos.getChildAt(i)
                 if (view is EditText) {
                     val videoUrl = view.text.toString().trim()
-                    if (videoUrl.isNotEmpty()) { // Optional: only add non-empty links
+                    if (videoUrl.isNotEmpty()) {
                         videoLinks.add(videoUrl)
                     }
                 }
             }
 
             uploadFilesAndCreatePost(title, content, user, courseId)
+        }
+
+        binding.btnFechar.setOnClickListener {
+            finish()
         }
     }
 

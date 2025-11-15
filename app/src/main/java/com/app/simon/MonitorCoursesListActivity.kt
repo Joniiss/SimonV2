@@ -53,12 +53,10 @@ class MonitorCoursesListActivity : AppCompatActivity() {
             insets
         }
 
-        // Clique no header
         val header = findViewById<LinearLayout>(R.id.header)
         header.setOnClickListener {
             val intent = Intent(this, HomeActivity::class.java)
-            //startActivity(intent)
-            finish() // fecha a CoursesListActivity
+            finish()
         }
 
         mAdapter = MonitorCoursesAdapter(mutableListOf(), user)
@@ -67,7 +65,6 @@ class MonitorCoursesListActivity : AppCompatActivity() {
 
         getMonitorCourses(user.uid)
             .addOnCompleteListener { task ->
-                Toast.makeText(baseContext, "ENTROU AQUI", Toast.LENGTH_SHORT).show()
                 if (task.isSuccessful) {
                     val genericResp = gson.fromJson(
                         task.result,
@@ -86,12 +83,8 @@ class MonitorCoursesListActivity : AppCompatActivity() {
                 else {
                     val e = task.exception
                     if (e is FirebaseFunctionsException) {
-                        // Function error code, will be INTERNAL if the failure
-                        // was not handled properly in the function call.
                         val code = e.code
                         println(code)
-                        // Arbitrary error details passed back from the function,
-                        // usually a Map<String, Any>.
                         Toast.makeText(baseContext, code.toString(), Toast.LENGTH_SHORT).show()
 
                         val details = e.details

@@ -42,7 +42,6 @@ class ForumPostActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-        //setContentView(R.layout.activity_forum_post)
         binding = ActivityForumPostBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -61,11 +60,9 @@ class ForumPostActivity : AppCompatActivity() {
 
             val params = commentBar.layoutParams as FrameLayout.LayoutParams
             if (keypadHeight > screenHeight * 0.15) {
-                // Teclado visível → sobe barra, mas nunca menos de 20dp da borda
                 val minMargin = (20 * resources.displayMetrics.density).roundToInt()
                 params.bottomMargin = max(minMargin, keypadHeight)
             } else {
-                // Teclado oculto → fixa no rodapé
                 params.bottomMargin = 0
             }
             commentBar.layoutParams = params
@@ -89,7 +86,6 @@ class ForumPostActivity : AppCompatActivity() {
         if (post.data.comments.isNotEmpty()) {
             getComments(post.docId)
                 .addOnCompleteListener { task ->
-                    Toast.makeText(baseContext, "ENTROU AQUI", Toast.LENGTH_SHORT).show()
                     if (task.isSuccessful) {
                         val genericResp = gson.fromJson(
                             task.result,

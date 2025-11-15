@@ -21,16 +21,14 @@ import com.google.firebase.firestore.QuerySnapshot
 class ChatActivity : AppCompatActivity() {
 
     companion object {
-        // Passe esse channelId via Intent extra ou calcule determinístico p/ 1:1
         const val EXTRA_CHANNEL_ID = "channel_id"
         private const val PAGE_SIZE = 20L
     }
 
-// ...
 
     private lateinit var titleView: TextView
     private val db: FirebaseFirestore by lazy { FirebaseFirestore.getInstance() }
-    private val nomeCache = mutableMapOf<String, String>() // pode ser compartilhado com adapter se quiser
+    private val nomeCache = mutableMapOf<String, String>()
 
     private val auth: FirebaseAuth by lazy { FirebaseAuth.getInstance() }
     private val repo = ChatRepository(auth = auth)
@@ -47,7 +45,7 @@ class ChatActivity : AppCompatActivity() {
     private var lastVisible: DocumentSnapshot? = null
     private var isLoadingMore = false
     private var reachedEnd = false
-    private val userCache = HashMap<String, Pair<String, String?>>() // uid -> (nome, fotoUrl)
+    private val userCache = HashMap<String, Pair<String, String?>>()
 
     private val currentChannelId: String by lazy {
         intent.getStringExtra(EXTRA_CHANNEL_ID)
@@ -56,9 +54,8 @@ class ChatActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_chat) // teu layout atual
+        setContentView(R.layout.activity_chat)
 
-        // IDs que devem existir no teu layout:
         btnBack = findViewById(R.id.btnBack)
         recycler = findViewById(R.id.recyclerChat)
         input = findViewById(R.id.edtMessage)
@@ -68,7 +65,7 @@ class ChatActivity : AppCompatActivity() {
         btnBack.setOnClickListener { finish() }
 
         layoutManager = LinearLayoutManager(this).apply {
-            reverseLayout = true   // mensagens mais novas no topo
+            reverseLayout = true
             stackFromEnd = false
         }
         adapter = ChatMessagesAdapter { auth.currentUser?.uid ?: "" }
@@ -146,13 +143,11 @@ class ChatActivity : AppCompatActivity() {
                 val nameFromDoc = doc.getString("name")
                 val members = doc.get("members") as? List<*> ?: emptyList<Any>()
 
-                // Se for grupo e tiver name, usa direto
                 if (type != "direct" && !nameFromDoc.isNullOrBlank()) {
                     titleView.text = nameFromDoc
                     return@addOnSuccessListener
                 }
 
-                // Se for direct, pega o "outro" uid
                 val otherUid = members.map { it.toString() }.firstOrNull { it != me }
                 if (otherUid == null) {
                     titleView.text = "Conversa"
@@ -178,7 +173,6 @@ class ChatActivity : AppCompatActivity() {
                 enableInput()
             },
             onError = {
-                // exibe erro conforme padrão do teu app
                 enableInput()
             }
         )
@@ -193,9 +187,6 @@ class ChatActivity : AppCompatActivity() {
         input.isEnabled = true
     }
 
-    /**
-     * Primeira página em tempo real
-     */
     private fun startListening() {
         stopListening()
         reachedEnd = false
@@ -215,32 +206,25 @@ class ChatActivity : AppCompatActivity() {
     private fun handleFirstPage(snap: QuerySnapshot) {
         val docs = snap.documents
 
-        // Âncora segura: último doc que já tem createdAt confirmado e não é pending write
         lastVisible = docs.lastOrNull { d ->
             d.getTimestamp("createdAt") != null && !d.metadata.hasPendingWrites()
         }
 
-        // Converte para modelo
         val list = docs.mapNotNull { d ->
             d.toObject(ChatMessage::class.java)?.copy(id = d.id)
         }
 
         adapter.submitList(list)
 
-        // marca como lidas as visíveis
         repo.markAsRead(
             docs = docs,
             onDone = { /* ok */ },
             onError = { /* log opcional */ }
         )
 
-        // opcional: detectar fim logo na 1ª página
         reachedEnd = docs.size < PAGE_SIZE
     }
 
-    /**
-     * Scroll para carregar mais quando chegar perto do fim
-     */
     private fun setupPaginationScroll() {
         recycler.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(rv: RecyclerView, dx: Int, dy: Int) {
@@ -249,7 +233,7 @@ class ChatActivity : AppCompatActivity() {
 
                 val total = layoutManager.itemCount
                 val lastVisiblePos = layoutManager.findLastVisibleItemPosition()
-                val shouldLoad = lastVisiblePos >= total - 5 // margem de segurança
+                val shouldLoad = lastVisiblePos >= total - 5
 
                 if (shouldLoad) loadMore()
             }
@@ -273,21 +257,18 @@ class ChatActivity : AppCompatActivity() {
                 }
                 lastVisible = docs.last()
 
-                // Lista atual (novas no topo)
                 val current = adapter.currentList.toMutableList()
                 val more = docs.map { it.toObject(ChatMessage::class.java)!!.copy(id = it.id) }
                 current.addAll(more)
 
                 adapter.submitList(current)
 
-                // marcar como lidas também
                 repo.markAsRead(docs, onDone = { }, onError = { })
 
                 isLoadingMore = false
             },
             onError = {
                 isLoadingMore = false
-                // exibe erro conforme padrão do app
             }
         )
     }

@@ -35,16 +35,6 @@ class ImagePagerAdapter(
             .override(width, height)
             .fitCenter()
             .into(holder.ivImage)
-
-
-
-//        holder.ivImage.setOnClickListener {
-//            val dialog = FullscreenImageDialog.newInstance(images[position].toString())
-//            dialog.show((context as AppCompatActivity).supportFragmentManager, "fullscreen")
-//        }
     }
-
-
-
     override fun getItemCount(): Int = images.size
 }

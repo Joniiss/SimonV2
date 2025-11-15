@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.app.simon.R
 import com.app.simon.data.ChatChannelItem
+import com.bumptech.glide.Glide
 import java.text.DateFormat
 
 class ChatsAdapter(
@@ -47,9 +48,6 @@ class ChatsAdapter(
             DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(it)
         } ?: ""
         holder.tvTime.text = time
-
-        // Se quiser carregar foto com Glide/Picasso:
-        // Glide.with(holder.itemView).load(item.photoUrl).placeholder(R.drawable.ic_user).into(holder.ivAvatar)
 
         holder.itemView.setOnClickListener { onClick(item) }
     }

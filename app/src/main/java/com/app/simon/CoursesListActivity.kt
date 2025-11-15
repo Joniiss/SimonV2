@@ -38,7 +38,6 @@ class CoursesListActivity : AppCompatActivity() {
         binding = ActivityCoursesListBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        //setContentView(R.layout.activity_courses_list)
 
         functions = Firebase.functions("southamerica-east1")
 
@@ -52,18 +51,15 @@ class CoursesListActivity : AppCompatActivity() {
             insets
         }
 
-        // Clique no header
         binding.header.setOnClickListener {
             val iVoltar = Intent(this, HomeActivity::class.java)
-            //startActivity(iVoltar)
-            finish() // fecha a CoursesListActivity
+            finish()
         }
 
         mAdapter = CoursesAdapter(mutableListOf(), user, true)
 
         getCourses(user.curso, user.periodo)
             .addOnCompleteListener { task ->
-                Toast.makeText(baseContext, "ENTROU AQUI", Toast.LENGTH_SHORT).show()
                 if (task.isSuccessful) {
                     val genericResp = gson.fromJson(
                         task.result,
@@ -82,25 +78,14 @@ class CoursesListActivity : AppCompatActivity() {
                 else {
                     val e = task.exception
                     if (e is FirebaseFunctionsException) {
-                        // Function error code, will be INTERNAL if the failure
-                        // was not handled properly in the function call.
                         val code = e.code
                         println(code)
-                        // Arbitrary error details passed back from the function,
-                        // usually a Map<String, Any>.
-                        Toast.makeText(baseContext, code.toString(), Toast.LENGTH_SHORT).show()
 
                         val details = e.details
                         println(details)
-                        Toast.makeText(baseContext, details.toString(), Toast.LENGTH_SHORT).show()
-
                     }
                 }
             }
-
-        if(mAdapter.itemCount == 0){
-            Toast.makeText(baseContext, "Você não possui matérias!", Toast.LENGTH_LONG).show()
-        }
     }
 
     private fun getCourses(course: String, term: Int): Task<String> {
@@ -123,7 +108,6 @@ class CoursesListActivity : AppCompatActivity() {
             .getHttpsCallable("helloWorld")
             .call(data)
             .continueWith { task ->
-                //gson.toJson(task.result?.data)
                 task.result?.data.toString()
             }
     }

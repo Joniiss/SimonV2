@@ -76,12 +76,8 @@ class NewForumPostActivity : AppCompatActivity() {
                     val e = task.exception
                     println(e)
                     if (e is FirebaseFunctionsException) {
-                        // Function error code, will be INTERNAL if the failure
-                        // was not handled properly in the function call.
                         val code = e.code
                         println(code)
-                        // Arbitrary error details passed back from the function,
-                        // usually a Map<String, Any>.
                         Toast.makeText(baseContext, code.toString(), Toast.LENGTH_SHORT).show()
 
                         val details = e.details
@@ -95,6 +91,10 @@ class NewForumPostActivity : AppCompatActivity() {
                 }
 
             }
+        }
+
+        binding.ivBack.setOnClickListener {
+            finish()
         }
     }
 

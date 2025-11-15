@@ -56,12 +56,6 @@ class ProfileActivity : AppCompatActivity(), OnMapReadyCallback {
 
         functions = Firebase.functions("southamerica-east1")
 
-        //ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
-        //    val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-        //    v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-        //    insets
-        //}
-
         subjectsContainer = findViewById(R.id.subjectsContainer)
 
         monitor = intent.getSerializableExtra("monitor") as MonitorData
@@ -106,12 +100,8 @@ class ProfileActivity : AppCompatActivity(), OnMapReadyCallback {
                 else {
                     val e = task.exception
                     if (e is FirebaseFunctionsException) {
-                        // Function error code, will be INTERNAL if the failure
-                        // was not handled properly in the function call.
                         val code = e.code
                         println(code)
-                        // Arbitrary error details passed back from the function,
-                        // usually a Map<String, Any>.
                         Toast.makeText(baseContext, code.toString(), Toast.LENGTH_SHORT).show()
 
                         val details = e.details
@@ -197,12 +187,10 @@ class ProfileActivity : AppCompatActivity(), OnMapReadyCallback {
             return null
         }
 
-        // 1. Gerar todos os slots de horário individuais válidos a partir de HorariosData
         val allIndividualSlots = mutableListOf<ProximoHorarioSlot>()
-        for (horarioData in horariosDisponiveis) { // Itera sobre a sua HorariosData
-            val dayOfWeek = horarioData.day.toDayOfWeek() // Converte a string do dia para DayOfWeek
+        for (horarioData in horariosDisponiveis) {
+            val dayOfWeek = horarioData.day.toDayOfWeek()
 
-            // Converte Array<Int> para List<Int> e então remove o último elemento (hora final)
             val slotsValidos = horarioData.time.toList().dropLast(1)
 
             for (hora in slotsValidos) {
@@ -210,52 +198,39 @@ class ProfileActivity : AppCompatActivity(), OnMapReadyCallback {
             }
         }
 
-        // Se após processar, não houver slots válidos, retorna null
         if (allIndividualSlots.isEmpty()) {
             return null
         }
 
-        // Ponto de referência: o momento atual exato
         val agora = ZonedDateTime.now(ZoneId.systemDefault())
 
         var proximoSlotEncontrado: ProximoHorarioSlot? = null
-        var menorDuracaoAteProximo = Long.MAX_VALUE // Para encontrar o slot mais próximo, em minutos
+        var menorDuracaoAteProximo = Long.MAX_VALUE
 
-        // Iterar sobre todos os slots individuais para encontrar o mais próximo no futuro
         for (slot in allIndividualSlots) {
-            // Começa com a data/hora atual e ajusta para o dia da semana e hora do slot
             var dataHoraPotencialSlot = agora
                 .withHour(slot.hora)
-                .withMinute(0) // Horários são considerados no início da hora
+                .withMinute(0)
                 .withSecond(0)
                 .withNano(0)
 
-            // Determina se o slot deve ser esta semana ou a próxima.
-            val currentDayValue = agora.dayOfWeek.value // Monday=1, Sunday=7
+            val currentDayValue = agora.dayOfWeek.value
             val slotDayValue = slot.diaOfWeek.value
 
             if (slotDayValue < currentDayValue) {
-                // Se o dia do slot é anterior ao dia atual na semana (e.g., hoje é Quarta, slot é Segunda),
-                // então o slot deve ser na próxima semana.
                 dataHoraPotencialSlot = dataHoraPotencialSlot.plusWeeks(1)
                 dataHoraPotencialSlot = dataHoraPotencialSlot.with(TemporalAdjusters.nextOrSame(slot.diaOfWeek))
             } else if (slotDayValue > currentDayValue) {
-                // Se o dia do slot é posterior ao dia atual (e.g., hoje é Segunda, slot é Quarta),
-                // então o slot é para esta semana.
                 dataHoraPotencialSlot = dataHoraPotencialSlot.with(TemporalAdjusters.nextOrSame(slot.diaOfWeek))
-            } else { // Mesmo dia
-                // Se a hora do slot já passou, ou se é a mesma hora mas os minutos atuais já avançaram,
-                // então o slot é para a próxima semana (mesmo dia).
+            } else {
                 if (slot.hora < agora.hour || (slot.hora == agora.hour && agora.minute > 0)) {
                     dataHoraPotencialSlot = dataHoraPotencialSlot.plusWeeks(1)
                     dataHoraPotencialSlot = dataHoraPotencialSlot.with(TemporalAdjusters.nextOrSame(slot.diaOfWeek))
                 } else {
-                    // O slot está no futuro (ou exatamente agora) no mesmo dia desta semana.
                     dataHoraPotencialSlot = dataHoraPotencialSlot.with(TemporalAdjusters.nextOrSame(slot.diaOfWeek))
                 }
             }
 
-            // Finalmente, verifica se o slot potencial está estritamente no futuro em relação ao 'agora'.
             if (dataHoraPotencialSlot.isAfter(agora)) {
                 val duracao = ChronoUnit.MINUTES.between(agora, dataHoraPotencialSlot)
                 if (duracao < menorDuracaoAteProximo) {
@@ -276,13 +251,11 @@ class ProfileActivity : AppCompatActivity(), OnMapReadyCallback {
             return
         }
 
-        // ID determinístico para chat 1:1: dm_<uidMenor>_<uidMaior>
         val channelId = directChannelId(me, other)
 
         val db = FirebaseFirestore.getInstance()
         val ref = db.collection("Chats").document(channelId)
 
-        // Cria o canal só se não existir (em transação)
         db.runTransaction { tx ->
             val snap = tx.get(ref)
             if (!snap.exists()) {
@@ -292,16 +265,13 @@ class ProfileActivity : AppCompatActivity(), OnMapReadyCallback {
                     "members" to members,
                     "createdBy" to me,
                     "createdAt" to FieldValue.serverTimestamp(),
-                    // estes dois ajudam na tela de lista:
                     "lastMessage" to "",
                     "lastMessageAt" to FieldValue.serverTimestamp()
-                    // opcional: "name" caso você queira dar um nome fixo em grupos
                 )
                 tx.set(ref, data)
             }
             null
         }.addOnSuccessListener {
-            // Abre o chat
             val it = Intent(this, ChatActivity::class.java)
             it.putExtra(ChatActivity.EXTRA_CHANNEL_ID, channelId)
             startActivity(it)
@@ -310,7 +280,6 @@ class ProfileActivity : AppCompatActivity(), OnMapReadyCallback {
         }
     }
 
-    /** Gera um ID estável para conversas diretas 1:1 */
     private fun directChannelId(a: String, b: String): String {
         return if (a < b) "${a}_$b" else "${b}_$a"
     }

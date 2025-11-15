@@ -41,27 +41,22 @@ class FirstPageActivity : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
-        // Delay de 1.5 segundos antes de mostrar o popu
         auth = Firebase.auth
         functions = Firebase.functions("southamerica-east1")
     }
 
     override fun onStart() {
         super.onStart()
-        //auth.signOut()
         val currentUser = auth.currentUser
         if (currentUser == null) {
-            Toast.makeText(baseContext, "user nao logado", Toast.LENGTH_SHORT).show()
             lifecycleScope.launch {
-                delay(1500) // 1.5 segundos
+                delay(1500)
                 val loginDialog = LoginFragment()
                 loginDialog.show(supportFragmentManager, "login_popup")
             }
         }else{
-            Toast.makeText(baseContext, "user logado", Toast.LENGTH_SHORT).show()
             getUser(currentUser.uid)
                 .addOnCompleteListener { task ->
-                    Toast.makeText(baseContext, task.isSuccessful.toString(), Toast.LENGTH_SHORT).show()
                     if (task.isSuccessful) {
                         println("sucesso")
                         val genericResp = gson.fromJson(
@@ -75,12 +70,11 @@ class FirstPageActivity : AppCompatActivity() {
                         println(user!!.curso)
 
                         lifecycleScope.launch {
-                            delay(1500) // 1.5 segundos
-                            // Abre HomeActivity
+                            delay(1500)
                             val iHome = Intent(this@FirstPageActivity, HomeActivity::class.java)
                             iHome.putExtra("user", user)
                             startActivity(iHome)
-                            finish() // Fecha a FirstPageActivity
+                            finish()
                         }
                     }
                     else {

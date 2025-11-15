@@ -19,7 +19,7 @@ import com.app.simon.databinding.ActivityMuralPostBinding
 class MuralPostActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMuralPostBinding
-    private var imageAdapter: ImagePagerAdapter? = null // opcional, pode ser null
+    private var imageAdapter: ImagePagerAdapter? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

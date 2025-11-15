@@ -44,11 +44,9 @@ class LoginFragment : DialogFragment() {
         _binding = FragmentLoginBinding.inflate(layoutInflater)
         dialog.setContentView(binding.root)
 
-        // Fundo transparente e sem dim
         dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         dialog.window?.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
 
-        // Evita fechar ao clicar fora
         dialog.setCanceledOnTouchOutside(false)
         isCancelable = false
 
@@ -62,7 +60,6 @@ class LoginFragment : DialogFragment() {
             setGravity(Gravity.BOTTOM)
         }
 
-        // Animação do popup vindo de baixo
         binding.linearLayoutRoot.apply {
             translationY = 1000f
             alpha = 0f
@@ -86,13 +83,11 @@ class LoginFragment : DialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Fundo transparente
         dialog?.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         dialog?.window?.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
         dialog?.setCanceledOnTouchOutside(false)
         isCancelable = false
 
-        // Edge-to-Edge
         ViewCompat.setOnApplyWindowInsetsListener(binding.root) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
@@ -113,11 +108,6 @@ class LoginFragment : DialogFragment() {
                 .addOnCompleteListener(requireActivity()) { task ->
                     if (task.isSuccessful) {
                         val user = auth.currentUser
-                        Toast.makeText(
-                            requireContext(),
-                            "Login realizado para usuário ${user?.email}",
-                            Toast.LENGTH_LONG
-                        ).show()
 
                         getUser(user!!.uid)
                             .addOnCompleteListener { task ->

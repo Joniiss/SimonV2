@@ -39,6 +39,7 @@ class MonitorCoursesAdapter(private val mData: MutableList<MonitorData>, private
             btnAccess.setOnClickListener{
                 val iCourse = Intent(itemView.context, MonitorsListActivity::class.java)
                 iCourse.putExtra("courseId",item.disciplinaId)
+                iCourse.putExtra("courseName",item.disciplina)
                 iCourse.putExtra("user", user)
 
                 itemView.context.startActivity(iCourse)

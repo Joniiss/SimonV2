@@ -14,11 +14,6 @@ import com.google.firebase.firestore.FirebaseFirestore
 import java.text.DateFormat
 import kotlin.math.log
 
-/**
- * Adapter que posiciona:
- *  - mensagens do "meu" usuário: à DIREITA
- *  - mensagens do outro: à ESQUERDA
- */
 class ChatMessagesAdapter(
     private val myUidProvider: () -> String
 ) : ListAdapter<ChatMessage, ChatMessagesAdapter.VH>(DIFF) {
@@ -34,10 +29,9 @@ class ChatMessagesAdapter(
     }
 
     private val db = FirebaseFirestore.getInstance()
-    private val nomeCache = mutableMapOf<String, String>() // uid -> nome
+    private val nomeCache = mutableMapOf<String, String>()
 
     private fun getUserName(uid: String, onResult: (String?) -> Unit) {
-        // 1) tenta cache local
         nomeCache[uid]?.let { onResult(it); return }
 
         val dbAluno = db.collection("Alunos")

@@ -45,6 +45,8 @@ class MuralActivity : AppCompatActivity() {
 
         val user = intent.getSerializableExtra("user") as User
         val courseId = intent.getStringExtra("courseId")
+        val courseName = intent.getStringExtra("courseName")
+
 
         mRecyclerView = binding.rvMuralPosts
 
@@ -56,9 +58,10 @@ class MuralActivity : AppCompatActivity() {
 
         mAdapter = MuralPostsAdapter(mutableListOf(), user)
 
+        binding.tvSubject.text = courseName
+
         getMuralPosts(courseId!!)
             .addOnCompleteListener { task ->
-                Toast.makeText(baseContext, "ENTROU AQUI", Toast.LENGTH_SHORT).show()
                 if (task.isSuccessful) {
                     val genericResp = gson.fromJson(
                         task.result,
@@ -67,13 +70,17 @@ class MuralActivity : AppCompatActivity() {
 
                     println(genericResp.payload)
 
-                    val posts = Klaxon()
-                        .parseArray<MuralPostData>(genericResp.payload.toString())
+                    if (genericResp.payload.toString() != "No matching documents.") {
+                        val posts = Klaxon()
+                            .parseArray<MuralPostData>(genericResp.payload.toString())
 
-                    mAdapter = MuralPostsAdapter(posts!! as MutableList<MuralPostData>, user)
+                        mAdapter = MuralPostsAdapter(posts!! as MutableList<MuralPostData>, user)
 
-                    mRecyclerView.layoutManager = LinearLayoutManager(this)
-                    mRecyclerView.adapter = mAdapter
+                        mRecyclerView.layoutManager = LinearLayoutManager(this)
+                        mRecyclerView.adapter = mAdapter
+                    }
+
+
                 }
             }
 
@@ -88,6 +95,7 @@ class MuralActivity : AppCompatActivity() {
             val intent = Intent(this, MonitorsListActivity::class.java)
             intent.putExtra("user", user)
             intent.putExtra("courseId", courseId)
+            intent.putExtra("courseName", courseName)
             startActivity(intent)
         }
 
@@ -95,6 +103,7 @@ class MuralActivity : AppCompatActivity() {
             val intent = Intent(this, ForumActivity::class.java)
             intent.putExtra("user", user)
             intent.putExtra("courseId", courseId)
+            intent.putExtra("courseName", courseName)
             startActivity(intent)
         }
 

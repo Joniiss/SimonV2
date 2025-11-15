@@ -17,13 +17,10 @@ data class MessageStatus(
     val readBy: List<String> = emptyList()
 )
 
-/**
- * Documento em channels/{channelId}/messages/{messageId}
- */
 data class ChatMessage(
     @DocumentId val id: String? = null,
     val text: String? = null,
-    val type: String = "text",          // "text" | "image" | ...
+    val type: String = "text",
     val senderId: String = "",
     val createdAt: Timestamp? = null,
     val attachments: List<ChatAttachment> = emptyList(),
