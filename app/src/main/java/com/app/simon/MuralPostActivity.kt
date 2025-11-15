@@ -41,6 +41,10 @@ class MuralPostActivity : AppCompatActivity() {
         binding.tvTitulo.text = post.title
         binding.tvDescricao.text = post.content
 
+        binding.ivBack.setOnClickListener {
+            finish()
+        }
+
         val images: List<Uri> = post.images.toList().map { Uri.parse(it) }
         if (images.isNotEmpty()) {
             imageAdapter = ImagePagerAdapter(this, images)
