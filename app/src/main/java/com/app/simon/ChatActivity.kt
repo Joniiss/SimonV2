@@ -7,11 +7,15 @@ import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.app.simon.adapter.ChatMessagesAdapter
 import com.app.simon.data.ChatMessage
 import com.app.simon.data.ChatRepository
+import com.app.simon.databinding.ActivityChatBinding
+import com.app.simon.databinding.ActivityHomeBinding
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
@@ -45,6 +49,8 @@ class ChatActivity : AppCompatActivity() {
 
     private var liveReg: ListenerRegistration? = null
     private var lastVisible: DocumentSnapshot? = null
+
+    private lateinit var binding: ActivityChatBinding
     private var isLoadingMore = false
     private var reachedEnd = false
     private val userCache = HashMap<String, Pair<String, String?>>() // uid -> (nome, fotoUrl)
@@ -65,6 +71,9 @@ class ChatActivity : AppCompatActivity() {
         sendBtn = findViewById(R.id.btnSend)
         titleView = findViewById(R.id.tvTitle)
 
+        binding = ActivityChatBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+
         btnBack.setOnClickListener { finish() }
 
         layoutManager = LinearLayoutManager(this).apply {
@@ -80,6 +89,12 @@ class ChatActivity : AppCompatActivity() {
         setupSendActions()
 
         startListening()
+
+        ViewCompat.setOnApplyWindowInsetsListener(binding.main) { v, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
+            insets
+        }
     }
 
     override fun onDestroy() {
