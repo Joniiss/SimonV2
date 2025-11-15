@@ -8,7 +8,6 @@
     android:background="@color/white"
     tools:context=".ChatActivity">
 
-    <!-- HEADER (padrão dos seus screens) -->
     <LinearLayout
         android:id="@+id/header"
         android:layout_width="match_parent"
@@ -40,7 +39,6 @@
             android:textStyle="bold"/>
     </LinearLayout>
 
-    <!-- LISTA DE MENSAGENS -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerChat"
         android:layout_width="0dp"
@@ -54,7 +52,6 @@
         app:layout_constraintEnd_toEndOf="parent"
         tools:listitem="@layout/item_chat_message" />
 
-    <!-- BARRA DE MENSAGEM (inspirada na barra de comentários) -->
     <LinearLayout
         android:id="@+id/messageBar"
         android:layout_width="0dp"
